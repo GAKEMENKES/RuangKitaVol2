@@ -248,6 +248,112 @@ body::after{
   .topbar,.print-actions,.back-btn,.nb,.btn-pri,.btn-sec,.btn-wa,.btn-gold,.btn-ghost,.al,.tbar{display:none!important}
   body::before, body::after{display:none!important}
 }
+  @media print{
+  .topbar,.print-actions,.back-btn,.nb,.btn-pri,.btn-sec,.btn-wa,.btn-gold,.btn-ghost,.al,.tbar{display:none!important}
+  body::before, body::after{display:none!important}
+}
+
+/* --- PASTE KODE BARU DI SINI (DI BAWAH MEDIA PRINT) --- */
+@media (max-width: 768px) {
+  .topbar {
+    padding: 0 1rem;
+    height: auto;
+    flex-direction: column;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    gap: 10px;
+  }
+  .topbar div:last-child {
+    margin-left: 0 !important;
+    width: 100%;
+    justify-content: space-between;
+  }
+  .page {
+    padding: 1rem 1rem;
+  }
+  .nav {
+    gap: 10px;
+    width: 100%;
+    justify-content: space-between;
+    overflow-x: auto;
+    padding-bottom: 5px;
+  }
+  .nb {
+    font-size: 12px;
+    padding: 5px 0;
+  }
+  .logo em {
+    display: none;
+  }
+  .hero {
+    margin: -1rem -1rem 1.5rem;
+    padding: 3rem 1rem 2rem;
+    min-height: auto;
+  }
+  .hero h1 {
+    font-size: 28px;
+  }
+  .hero p {
+    font-size: 14px;
+  }
+  .hero-btns {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .btn-gold, .btn-ghost {
+    width: 100%;
+    justify-content: center;
+  }
+  .stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .stat-val {
+    font-size: 20px;
+  }
+  .today-wrap {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .form-actions {
+    flex-direction: column-reverse;
+    width: 100%;
+  }
+  .form-actions button {
+    width: 100%;
+    justify-content: center;
+  }
+  .help-grid {
+    grid-template-columns: 1fr;
+  }
+  .help-nav {
+    flex-direction: row;
+    overflow-x: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--bdr2);
+    padding-right: 0;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+  }
+  .help-nav-btn {
+    white-space: nowrap;
+  }
+  .ph {
+    flex-direction: column;
+    text-align: center !important;
+  }
+  .ph img {
+    margin: 0 auto;
+  }
+}
+/* --- BATAS AKHIR KODE BARU --- */
+
+</style>
+</head>
 /* --- FITUR BARU: TOMBOL BANTUAN MENGAMBANG & MODAL BANTUAN --- */
 .fab-help {
   position: fixed;
