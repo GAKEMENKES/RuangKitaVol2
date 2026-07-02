@@ -841,33 +841,107 @@ body::after{
       </h3>
       <button onclick="closeHelpModal()" style="background:none; border:none; color:var(--muted); font-size:22px; cursor:pointer;">&times;</button>
     </div>
+
     <div class="help-grid">
       <div class="help-nav">
         <button class="help-nav-btn active" onclick="switchHelpTab(event, 'pane-ai')"><i class="ti ti-robot"></i> AI Asisten GA</button>
         <button class="help-nav-btn" onclick="switchHelpTab(event, 'pane-wa')"><i class="ti ti-brand-whatsapp"></i> Hubungi Admin GA</button>
+ <button class="help-nav-btn" onclick="switchHelpTab(event, 'pane-Document')"><i class="ti ti-file-text"></i> Panduan SOP Penggunaan Ruangan</button>
+        <button class="help-nav-btn" onclick="switchHelpTab(event, 'pane-web')"><i class="ti ti-device-laptop"></i> Panduan Web</button>
+        <button class="help-nav-btn" onclick="switchHelpTab(event, 'pane-mic')"><i class="ti ti-microphone"></i> Panduan Mic</button>
+        <button class="help-nav-btn" onclick="switchHelpTab(event, 'pane-vtron')"><i class="ti ti-device-tv"></i> Panduan Videotron</button>
+        <button class="help-nav-btn" onclick="switchHelpTab(event, 'pane-tv')"><i class="ti ti-screen-share"></i> Panduan TV Room</button>
       </div>
+
       <div class="help-content-area">
-        <div class="help-content-pane active" id="pane-ai">
-          <h4>🤖 RuangKita Smart AI</h4>
-          <p style="font-size: 12px; color: var(--muted); margin-bottom: 8px;">Tanyakan apa saja seputar operasional logistik atau kendala ruangan.</p>
-          <div class="ai-chat-box" id="ai-chat-screen">
-            <div class="ai-msg bot">Halo! Saya AI Asisten RuangKita. Ada yang bisa saya bantu terkait penggunaan fasilitas atau jadwal ruang rapat hari ini?</div>
-          </div>
-          <div style="display: flex; gap: 8px;">
-            <input type="text" id="ai-input" placeholder="Ketik pertanyaan Anda di sini..." style="flex: 1; padding: 10px; background: #262626; border: 1px solid var(--bdr2); color: #fff; border-radius: var(--r); outline: none;">
-            <button class="btn-pri" onclick="sendAiMessage()" style="padding: 0 15px;"><i class="ti ti-send"></i></button>
-          </div>
-        </div>
-        <div class="help-content-pane" id="pane-wa">
-          <h4>💬 Koordinasi Cepat via WhatsApp</h4>
-          <p style="margin-bottom: 15px;">Jika Anda memerlukan bantuan fisik mendesak, silakan hubungi langsung Admin General Affairs.</p>
-          <button class="btn-wa" onclick="contactAdminDirectly()" style="width: 100%; justify-content: center; text-decoration: none;">
-            <i class="ti ti-brand-whatsapp"></i> Chat WhatsApp Admin GA RS
-          </button>
-        </div>
-      </div>
+  
+  <!-- PANE: AI ASISTEN (Tetap sama seperti sebelumnya) -->
+  <div class="help-content-pane active" id="pane-ai">
+    <h4>🤖 RuangKita Smart AI</h4>
+    <p style="font-size: 12px; color: var(--muted); margin-bottom: 8px;">Tanyakan apa saja seputar operasional logistik atau kendala ruangan.</p>
+    <div class="ai-chat-box" id="ai-chat-screen">
+      <div class="ai-msg bot">Halo! Saya AI Asisten RuangKita. Ada yang bisa saya bantu terkait penggunaan fasilitas atau jadwal ruang rapat hari ini?</div>
+    </div>
+    <div style="display: flex; gap: 8px;">
+      <input type="text" id="ai-input" placeholder="Ketik pertanyaan Anda di sini..." style="flex: 1; padding: 10px; background: #262626; border: 1px solid var(--bdr2); color: #fff; border-radius: var(--r); outline: none;">
+      <button class="btn-pri" onclick="sendAiMessage()" style="padding: 0 15px;"><i class="ti ti-send"></i></button>
     </div>
   </div>
+
+  <!-- PANE: WHATSAPP ADMIN GA (Tetap sama seperti sebelumnya) -->
+  <div class="help-content-pane" id="pane-wa">
+    <h4>💬 Koordinasi Cepat via WhatsApp</h4>
+    <p style="margin-bottom: 15px;">Jika Anda memerlukan bantuan fisik mendesak, silakan hubungi langsung Admin General Affairs.</p>
+    <button class="btn-wa" onclick="contactAdminDirectly()" style="width: 100%; justify-content: center; text-decoration: none;">
+      <i class="ti ti-brand-whatsapp"></i> Chat WhatsApp Admin GA RS
+    </button>
+  </div>
+
+<!-- PANE: PANDUAN SOP PENGGUNAAN RUANGAN(BERUBAH MENJADI TOMBOL PDF) -->
+  <div class="help-content-pane" id="pane-Document">
+    <h4>📋 Dokumen SOP Penggunaan Ruangan</h4>
+    <div style="background: #262626; border: 1px solid var(--bdr2); padding: 25px; border-radius: var(--r); text-align: center; margin-top: 15px;">
+      <i class="ti ti-file-type-pdf" style="font-size: 48px; color: var(--acc); display: block; margin-bottom: 12px;"></i>
+      <p style="font-size: 14px; font-weight: 600; margin-bottom: 6px;">Buku Panduan SOP Penggunaan Ruangan</p>
+      <p style="font-size: 12px; color: var(--muted); margin-bottom: 20px;">Format: PDF • Kategori: SOP Penggunaan Ruangan</p>
+      <a href="Tuangkan pdf disini.pdf" target="_blank" class="btn-pri" style="text-decoration: none; display: inline-flex; justify-content: center; width: 100%; max-width: 250px;">
+        <i class="ti ti-external-link"></i> Buka File PDF Panduan
+      </a>
+    </div>
+  </div>
+
+  <!-- PANE: PANDUAN PENGGUNAAN WEB (BERUBAH MENJADI TOMBOL PDF) -->
+  <div class="help-content-pane" id="pane-web">
+    <h4>🌐 Dokumen Panduan Sistem Web</h4>
+    <div style="background: #262626; border: 1px solid var(--bdr2); padding: 25px; border-radius: var(--r); text-align: center; margin-top: 15px;">
+      <i class="ti ti-file-type-pdf" style="font-size: 48px; color: var(--acc); display: block; margin-bottom: 12px;"></i>
+      <p style="font-size: 14px; font-weight: 600; margin-bottom: 6px;">Buku Panduan Operasional Web RuangKita</p>
+      <p style="font-size: 12px; color: var(--muted); margin-bottom: 20px;">Format: PDF • Kategori: Administrasi & Alur Booking</p>
+      <a href="RuangKita_Guide.pdf" target="_blank" class="btn-pri" style="text-decoration: none; display: inline-flex; justify-content: center; width: 100%; max-width: 250px;">
+        <i class="ti ti-external-link"></i> Buka File PDF Panduan
+      </a>
+    </div>
+  </div>
+
+  <!-- PANE: PANDUAN MENYALAKAN MIC (BERUBAH MENJADI TOMBOL PDF) -->
+  <div class="help-content-pane" id="pane-mic">
+    <h4>🎤 Dokumen Panduan Sound System & Microphone</h4>
+    <div style="background: #262626; border: 1px solid var(--bdr2); padding: 25px; border-radius: var(--r); text-align: center; margin-top: 15px;">
+      <i class="ti ti-file-type-pdf" style="font-size: 48px; color: var(--acc); display: block; margin-bottom: 12px;"></i>
+      <p style="font-size: 14px; font-weight: 600; margin-bottom: 6px;">SOP Pengaktifan & Pengaturan Audio Mixer</p>
+      <p style="font-size: 12px; color: var(--muted); margin-bottom: 20px;">Format: PDF • Kategori: Logistik Audio Elektrik</p>
+      <a href="Microphone_Guide.pdf" target="_blank" class="btn-pri" style="text-decoration: none; display: inline-flex; justify-content: center; width: 100%; max-width: 250px;">
+        <i class="ti ti-external-link"></i> Buka File PDF Panduan
+      </a>
+    </div>
+  </div>
+
+  <!-- PANE: PANDUAN MENYALAKAN VIDEOTRON (BERUBAH MENJADI TOMBOL PDF) -->
+  <div class="help-content-pane" id="pane-vtron">
+    <h4>🖥️ Dokumen Panduan Sistem Videotron</h4>
+    <div style="background: #262626; border: 1px solid var(--bdr2); padding: 25px; border-radius: var(--r); text-align: center; margin-top: 15px;">
+      <i class="ti ti-file-type-pdf" style="font-size: 48px; color: var(--acc); display: block; margin-bottom: 12px;"></i>
+      <p style="font-size: 14px; font-weight: 600; margin-bottom: 6px;">Panduan Layar Videotron RS</p>
+      <p style="font-size: 12px; color: var(--muted); margin-bottom: 20px;">Format: PDF • Kategori: Multimedia Gedung Utama</p>
+      <a href="Videotron_Guide.pdf" target="_blank" class="btn-pri" style="text-decoration: none; display: inline-flex; justify-content: center; width: 100%; max-width: 250px;">
+        <i class="ti ti-external-link"></i> Buka File PDF Panduan
+      </a>
+    </div>
+  </div>
+
+  <!-- PANE: PANDUAN MENYALAKAN TV (BERUBAH MENJADI TOMBOL PDF) -->
+  <div class="help-content-pane" id="pane-tv">
+    <h4>📺 Dokumen Panduan TV Room & Teleconference</h4>
+    <div style="background: #262626; border: 1px solid var(--bdr2); padding: 25px; border-radius: var(--r); text-align: center; margin-top: 15px;">
+      <i class="ti ti-file-type-pdf" style="font-size: 48px; color: var(--acc); display: block; margin-bottom: 12px;"></i>
+      <p style="font-size: 14px; font-weight: 600; margin-bottom: 6px;">Panduan Smart TV Room</p>
+      <p style="font-size: 12px; color: var(--muted); margin-bottom: 20px;">Format: PDF • Kategori: Media Meeting Internal</p>
+      <a href="Share Screen_Guide.pdf" target="_blank" class="btn-pri" style="text-decoration: none; display: inline-flex; justify-content: center; width: 100%; max-width: 250px;">
+        <i class="ti ti-external-link"></i> Buka File PDF Panduan
+      </a>
+    </div>
+  </div>
+
 </div>
 
 <script>
@@ -1005,8 +1079,11 @@ async function fetchBookingsFromCloud() {
       if (savedWa) waNum = savedWa;
     } catch(e) {}
 
-    // Jangan lupa update users background
-    await fetchUsersFromCloud();
+
+  await fetchUsersFromCloud();
+
+
+    checkAndSendBAReminders();
 
     if (document.getElementById('page-home').classList.contains('on')) renderHome();
     else if (document.getElementById('page-bookings').classList.contains('on')) renderBookings();
@@ -1438,6 +1515,50 @@ function getBAButtonHtml(b) {
           </span>`;
 }
 
+async function checkAndSendBAReminders() {
+  if (!currentUser) return;
+  const now = new Date();
+  const todayNow = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+  const currentTimeInMinutes = (now.getHours() * 60) + now.getMinutes();
+
+  for (const b of bookings) {
+    if (b.date !== todayNow) continue;
+    if (!b.email) continue;
+
+    const [startH, startM] = b.startTime.split(':').map(Number);
+    const [endH, endM] = b.endTime.split(':').map(Number);
+    const startTimeInMinutes = (startH * 60) + startM;
+    const endTimeInMinutes = (endH * 60) + endM;
+
+    // --- Reminder BA MASUK: window H-1 jam s.d. jam mulai, belum diisi, belum pernah dikirim ---
+    if (!b.baCheckIn && !b.baInReminderSent) {
+      const timeUntilStart = startTimeInMinutes - currentTimeInMinutes;
+      if (timeUntilStart <= 60 && currentTimeInMinutes <= endTimeInMinutes) {
+        sendSystemEmail(
+          b.email,
+          `[Pengingat] Saatnya Isi BA Masuk - ${b.eventName}`,
+          `Halo ${b.applicantName},\n\nAgenda "${b.eventName}" di ruangan ${b.roomName} akan segera dimulai pukul ${b.startTime} WIB.\n\nMohon segera login ke sistem RuangKita dan isi Berita Acara Masuk sebelum rapat dimulai, agar kelayakan fasilitas ruangan dapat terverifikasi.\n\nTerima kasih.\n\nSalam,\nGA RS Kemenkes Surabaya`
+        );
+        b.baInReminderSent = true;
+        if (b._fbKey) fbPatch(`bookings/${b._fbKey}`, { baInReminderSent: true }).catch(()=>{});
+      }
+    }
+
+    // --- Reminder BA KELUAR: sudah lewat endTime, BA masuk ada tapi BA keluar belum, belum pernah dikirim ---
+    if (b.baCheckIn && !b.baCheckOut && !b.baOutReminderSent) {
+      if (currentTimeInMinutes >= endTimeInMinutes) {
+        sendSystemEmail(
+          b.email,
+          `[Pengingat] Saatnya Isi BA Keluar - ${b.eventName}`,
+          `Halo ${b.applicantName},\n\nAgenda "${b.eventName}" di ruangan ${b.roomName} sudah selesai pukul ${b.endTime} WIB.\n\nMohon segera login ke sistem RuangKita dan isi Berita Acara Keluar (check-out) agar ruangan dapat dikembalikan dan diverifikasi oleh Tim GA.\n\nTerima kasih.\n\nSalam,\nGA RS Kemenkes Surabaya`
+        );
+        b.baOutReminderSent = true;
+        if (b._fbKey) fbPatch(`bookings/${b._fbKey}`, { baOutReminderSent: true }).catch(()=>{});
+      }
+    }
+  }
+}
+
 function renderUpcoming() {
   const today = todayStr(), now = new Date(), ns = now.toTimeString().slice(0,5);
   const todayFut = bookings.filter(b => b.date===today && b.startTime > ns);
@@ -1696,8 +1817,8 @@ function openBAModalOpen(id, type) {
   html += `
     </div>
     <div class="fg">
-      <label>Catatan Fisik Tambahan / Logistik Khusus</label>
-      <input type="text" id="ba-notes" placeholder="${type === 'in' ? 'Contoh: TV Menyala, Kursi lengkap 30' : 'Contoh: AC & Lampu mati rapi, ruangan bersih'}">
+      <label><b>KETERANGAN</b></label>
+      <input type="text" id="ba-notes" placeholder="${type === 'in' ? 'Contoh: TV tidak menyala karena tidak ada kabel HDMI nya' : 'Contoh: AC & Lampu mati rapi, ruangan bersih'}">
     </div>
     <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 22px;">
       <button class="btn-sec" onclick="closeBAModal()" style="padding: 10px 20px; font-size: 13px;">Batal</button>
@@ -1982,28 +2103,145 @@ function viewPrint(id) {
       </div>
     </div>
     <div class="pb" style="padding: 35px; background: #ffffff; color: #141414; font-family: var(--font);">
-      <div style="text-align: center; margin-bottom: 30px;">
+     <div style="text-align: center; margin-bottom: 30px;">
         <h3 style="font-size: 16px; font-weight: 800; text-transform: uppercase; text-decoration: underline; letter-spacing: 0.5px;">SURAT IZIN PEMINJAMAN & PENGGUNAAN RUANGAN</h3>
         <p style="font-size: 13px; color: #444; margin-top: 4px;">Nomor Dokumen: Dok/GA-RS/${b.id}</p>
       </div>
+
       <p style="font-size: 13.5px; line-height: 1.5; margin-bottom: 15px; color: #333;">
         Berdasarkan data aplikasi sistem <b>RuangKita</b>, Bagian Urusan Rumah Tangga / <i>General Affairs</i> (GA) memberikan izin penggunaan aset ruangan kepada staf pemohon dengan rincian spesifikasi sebagai berikut:
       </p>
+
+      <h5 style="font-size: 13px; font-weight: 800; color: var(--acc); text-transform: uppercase; margin-bottom: 8px; border-left: 3px solid var(--acc); padding-left: 8px;">I. Data Penanggung Jawab Pemohon</h5>
       <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px; font-size: 13.5px;">
-        <tr><td style="width: 25%; padding: 8px 10px; font-weight: 600; background: #f9f9f9; border: 1px solid #e0e0e0; color: #141414;">Nama Lengkap</td><td style="width: 75%; padding: 8px 10px; border: 1px solid #e0e0e0; color: #141414;"><b>${b.applicantName}</b></td></tr>
-        <tr><td style="padding: 8px 10px; font-weight: 600; background: #f9f9f9; border: 1px solid #e0e0e0; color: #141414;">Unit Kerja / Dept</td><td style="padding: 8px 10px; border: 1px solid #e0e0e0; color: #141414;">${b.department}</td></tr>
+        <tr>
+          <td style="width: 25%; padding: 8px 10px; font-weight: 600; background: #f9f9f9; border: 1px solid #e0e0e0; color: #141414;">Nama Lengkap</td>
+          <td style="width: 75%; padding: 8px 10px; border: 1px solid #e0e0e0; color: #141414;"><b>${b.applicantName}</b></td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 10px; font-weight: 600; background: #f9f9f9; border: 1px solid #e0e0e0; color: #141414;">Unit Kerja / Dept</td>
+          <td style="padding: 8px 10px; border: 1px solid #e0e0e0; color: #141414;">${b.department}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 10px; font-weight: 600; background: #f9f9f9; border: 1px solid #e0e0e0; color: #141414;">Kontak</td>
+          <td style="padding: 8px 10px; border: 1px solid #e0e0e0; color: #141414;">${phone}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 10px; font-weight: 600; background: #f9f9f9; border: 1px solid #e0e0e0; color: #141414;">Alamat Email</td>
+          <td style="padding: 8px 10px; border: 1px solid #e0e0e0; font-family: monospace; color: #141414;">${b.email}</td>
+        </tr>
       </table>
+
+      <h5 style="font-size: 13px; font-weight: 800; color: var(--acc); text-transform: uppercase; margin-bottom: 8px; border-left: 3px solid var(--acc); padding-left: 8px;">II. Jadwal & Lokasi Penggunaan Ruangan</h5>
       <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px; font-size: 13.5px;">
-        <tr><td style="width: 25%; padding: 8px 10px; font-weight: 600; background: #f9f9f9; border: 1px solid #e0e0e0; color: #141414;">Nama Ruangan</td><td style="width: 75%; padding: 8px 10px; border: 1px solid #e0e0e0; color: #141414;"><b>${b.roomName}</b></td></tr>
-        <tr><td style="padding: 8px 10px; font-weight: 600; background: #f9f9f9; border: 1px solid #e0e0e0; color: #141414;">Hari & Tanggal</td><td style="padding: 8px 10px; border: 1px solid #e0e0e0; color: #141414;"><b>${fmtDate(b.date)}</b></td></tr>
-        <tr><td style="padding: 8px 10px; font-weight: 600; background: #f9f9f9; border: 1px solid #e0e0e0; color: #141414;">Waktu Pelaksanaan</td><td style="padding: 8px 10px; border: 1px solid #e0e0e0; color: #141414;"><b>${b.startTime} s/d ${b.endTime} WIB</b></td></tr>
+        <tr>
+          <td style="width: 25%; padding: 8px 10px; font-weight: 600; background: #f9f9f9; border: 1px solid #e0e0e0; color: #141414;">Nama Ruangan</td>
+          <td style="width: 75%; padding: 8px 10px; border: 1px solid #e0e0e0; color: #141414;"><b>${b.roomName}</b></td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 10px; font-weight: 600; background: #f9f9f9; border: 1px solid #e0e0e0; color: #141414;">Gedung</td>
+          <td style="padding: 8px 10px; border: 1px solid #e0e0e0; color: #141414;">${rm.location}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 10px; font-weight: 600; background: #f9f9f9; border: 1px solid #e0e0e0; color: #141414;">Hari & Tanggal</td>
+          <td style="padding: 8px 10px; border: 1px solid #e0e0e0; color: #141414;"><b>${fmtDate(b.date)}</b></td>
+        </tr>
+<tr>
+  <td style="padding: 8px 10px; font-weight: 600; background: #f9f9f9; border: 1px solid #e0e0e0; color: #141414;">Nama Peserta</td>
+  <td style="padding: 8px 10px; border: 1px solid #e0e0e0; color: #141414;">
+    ${b.eventAttendees || '-'}
+  </td>
+</tr>
+        <tr>
+          <td style="padding: 8px 10px; font-weight: 600; background: #f9f9f9; border: 1px solid #e0e0e0; color: #141414;">Waktu Pelaksanaan</td>
+          <td style="padding: 8px 10px; border: 1px solid #e0e0e0; color: #141414;"><b>${b.startTime} s/d ${b.endTime} WIB</b></td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 10px; font-weight: 600; background: #f9f9f9; border: 1px solid #e0e0e0; color: #141414;">Nama Agenda Acara</td>
+          <td style="padding: 8px 10px; border: 1px solid #e0e0e0; color: #141414;"><i>"${b.eventName}" (Level: ${b.meetingLevel || 'Staf'})</i></td>
+        </tr>
       </table>
+
+      <h5 style="font-size: 13px; font-weight: 800; color: var(--acc); text-transform: uppercase; margin-bottom: 8px; border-left: 3px solid var(--acc); padding-left: 8px;">III. Fasilitas Penunjang LOGISTIK</h5>
+      <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px; font-size: 13.5px;">
+        <tr>
+          <td style="width: 25%; padding: 8px 10px; font-weight: 600; background: #f9f9f9; border: 1px solid #e0e0e0; color: #141414;">Fasilitas Bawaan</td>
+          <td style="width: 75%; padding: 8px 10px; border: 1px solid #e0e0e0; font-size: 12.5px; line-height: 1.4;">
+            ${facs.map(f => `<span style="display:inline-block; background:#f0f0f0; padding:2px 8px; margin:2px; border-radius:2px; border:1px solid #ddd; color:#333;">✓ ${f}</span>`).join('')}
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 10px; font-weight: 600; background: #f9f9f9; border: 1px solid #e0e0e0; color: #141414;">Tata Letak Meja/Kursi</td>
+          <td style="padding: 8px 10px; border: 1px solid #e0e0e0; color: #141414;"><b>Model: ${layout}</b></td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 10px; font-weight: 600; background: #f9f9f9; border: 1px solid #e0e0e0; color: #141414;">Catatan Khusus GA</td>
+          <td style="padding: 8px 10px; border: 1px solid #e0e0e0; font-size: 13px; color:#555;"><i>${gaNotes}</i></td>
+        </tr>
+      </table>
+
+      <h5 style="font-size: 13px; font-weight: 800; color: var(--acc); text-transform: uppercase; margin-bottom: 8px; border-left: 3px solid var(--acc); padding-left: 8px;">IV. Lampiran Rekam Berita Acara Logistik Digital</h5>
+      <table style="width: 100%; border-collapse: collapse; margin-bottom: 35px; font-size: 13px;">
+        <thead>
+          <tr style="background:#f0f0f0;">
+            <th style="border:1px solid #dcdcdc; padding:8px; text-align:left; width:30%;">Tahapan Berita Acara</th>
+            <th style="border:1px solid #dcdcdc; padding:8px; text-align:left; width:25%;">Waktu Verifikasi</th>
+            <th style="border:1px solid #dcdcdc; padding:8px; text-align:left; width:45%;">Catatan Status Kondisi Fisik Alat (Oleh User)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="border:1px solid #dcdcdc; padding:8px; font-weight:700; color:#46d369;">1. BA Serah Terima Masuk</td>
+            <td style="border:1px solid #dcdcdc; padding:8px;">${b.baCheckIn ? b.baCheckIn.time + ' WIB' : '<span style="color:#e50914; font-weight:800;">❌ BELUM VERIFIKASI MASUK</span>'}</td>
+            <td style="border:1px solid #dcdcdc; padding:8px; font-style:italic;">"${b.baCheckIn ? b.baCheckIn.notes : '-'}"</td>
+          </tr>
+          <tr>
+            <td style="border:1px solid #dcdcdc; padding:8px; font-weight:700; color:#f5a623;">2. BA Serah Terima Keluar</td>
+            <td style="border:1px solid #dcdcdc; padding:8px;">${b.baCheckOut ? b.baCheckOut.time + ' WIB' : '<span style="color:#e50914; font-weight:800; background:#ffebeb; padding:2px 6px; border-radius:2px;">⚠️ BELUM CHECK-OUT (Inventaris Belum Dinyatakan Aman)</span>'}</td>
+            <td style="border:1px solid #dcdcdc; padding:8px; font-style:italic;">"${b.baCheckOut ? b.baCheckOut.notes : '-'}"</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div style="margin-top: 40px; display: flex; justify-content: space-between; font-size: 13.5px; padding: 0 10px; font-family: var(--font);">
+        <div style="width: 40%; text-align: center; display: flex; flex-direction: column; align-items: center;">
+          <p style="color: #444; margin: 0 0 10px 0;">User Penanggung Jawab,</p>
+          <div style="height: 75px; display: flex; align-items: center; justify-content: center;">
+            ${b.userSignature ? `<img src="${b.userSignature}" style="max-height: 70px; max-width: 160px; object-fit: contain;">` : `<div style="color:#ccc; font-size:11px; font-style:italic; padding-top:25px;">Signed Digitally</div>`}
+          </div>
+          <div style="margin-top: 10px;">
+            <p style="font-weight: 800; text-decoration: underline; color: #141414; margin: 0; padding-bottom: 2px;">${b.applicantName}</p>
+            <p style="font-size: 12px; color: #666; margin: 0;">${b.department}</p>
+          </div>
+        </div>
+
+        <div style="width: 40%; text-align: center; display: flex; flex-direction: column; align-items: center;">
+          <p style="color: #444; margin: 0 0 10px 0;">Surabaya, ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}<br>Admin General Affairs,</p>
+          <div style="height: 75px; display: flex; align-items: center; justify-content: center;">
+            <img src="ttd_adminga.png" style="max-height: 70px; max-width: 160px; object-fit: contain;" onerror="this.style.display='none';">
+          </div>
+          <div style="margin-top: 10px;">
+            <p style="font-weight: 800; text-decoration: underline; color: #141414; margin: 0; padding-bottom: 2px;">Ramadhanti Dwi Indra</p>
+            <p style="font-size: 12px; color: #666; margin: 0;">Admin General Affair</p>
+          </div>
+        </div>
+      </div>
+
       <div style="margin-top: 40px; border-top: 1px dashed #bbb; padding-top: 15px; font-family: var(--font);">
-        <h5 style="color: var(--acc); font-size: 12px; font-weight: 800; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px;">Syarat & Ketentuan:</h5>
+        <h5 style="color: var(--acc); font-size: 12px; font-weight: 800; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px;">
+          Syarat & Ketentuan Penggunaan Aset Rumah Sakit:
+        </h5>
         <ul style="margin: 0; padding-left: 16px; font-size: 11.5px; color: #555; line-height: 1.6; text-align: left;">
-          <li><b>Wajib mematikan seluruh fasilitas kelistrikan</b> (AC, Lampu, Sound System) setelah digunakan.</li>
+          <li style="margin-bottom: 4px;">Harap menjaga kebersihan, ketertiban, dan estetika area ruangan selama meeting berlangsung.</li>
+          <li style="margin-bottom: 4px;"><b>Wajib mengisi BA Checkin pada H-1 jam sebelum acara dimulai dan BA Checkout setelah acara selesai secepatnya.</b></li>
+          <li style="margin-bottom: 4px;"><b>Wajib mematikan seluruh fasilitas kelistrikan</b> (AC, Lampu, Sound System, Microphone, Videotron) secara mandiri apabila agenda rapat telah dinyatakan selesai.</li>
+          <li style="margin-bottom: 4px;">Dilarang memindahkan atau mengubah konfigurasi perangkat logistik utama ruangan tanpa persetujuan atau pendampingan dari Tim GA.</li>
+          <li style="margin-bottom: 4px;"><b>Apabila terjadi pembatalan atau <i>reschedule meeting</i></b>, harap untuk menghapus agenda di dalam website.</li>
+          <li style="margin-bottom: 4px;">Setelah kegiatan selesai, pengguna memastikan ruangan tetap rapi and fasilitas dikembalikan seperti semula.</li>
+          <li style="margin-bottom: 4px;">Segera laporkan status akhir pemakaian ruangan dan pengembalian fasilitas penunjang ke meja loket utama kompartemen <i>General Affairs</i> (GA).</li>
         </ul>
       </div>
+
     </div>
   `;
   go('print');
@@ -2135,9 +2373,46 @@ function renderAdminBulletinAndMaintenance() {
 
   html += `   </div>
             </div>
+          </div>
+
+          <div class="fc" style="margin-top:20px;">
+            <div class="fc-title"><i class="ti ti-list-details"></i> Daftar Pengumuman Aktif (Khusus Admin)</div>
+            <div style="display:flex; flex-direction:column; gap:10px; max-height:320px; overflow-y:auto;">
+              ${bulletins.length === 0 ? `<div style="color:var(--muted); font-size:12.5px; text-align:center; padding:20px 0;">Belum ada pengumuman yang diterbitkan.</div>` : [...bulletins].reverse().map(item => `
+                <div style="background:#262626; border:1px solid var(--bdr2); padding:12px 14px; border-radius:4px; display:flex; align-items:flex-start; justify-content:space-between; gap:12px;">
+                  <div style="flex:1; min-width:0;">
+                    <div style="font-size:11px; color:var(--muted); font-weight:700; margin-bottom:3px; text-transform:uppercase;">${item.category}</div>
+                    <div style="font-size:13.5px; font-weight:700; color:#fff; margin-bottom:3px;">${item.title}</div>
+                    <div style="font-size:12px; color:#aaaaaa; line-height:1.4;">${item.content}</div>
+                  </div>
+                  <button class="bic del" onclick="deleteBulletinAction('${item._fbKey}')" title="Hapus Pengumuman Ini" style="flex-shrink:0;"><i class="ti ti-trash"></i></button>
+                </div>
+              `).join('')}
+            </div>
           </div>`;
           
   document.getElementById('t-bulletin-maint').innerHTML = html;
+}
+
+async function deleteBulletinAction(fbKey) {
+  if (!currentUser || currentUser.role !== 'admin') {
+    alert('Akses Ditolak: Hanya Admin GA yang dapat menghapus pengumuman!');
+    return;
+  }
+  if (!fbKey) {
+    alert('Data pengumuman tidak valid.');
+    return;
+  }
+  if (confirm('Hapus pengumuman ini secara permanen? Tindakan ini tidak dapat dibatalkan.')) {
+    try {
+      await fbDelete(`bulletins/${fbKey}`);
+      bulletins = bulletins.filter(b => b._fbKey !== fbKey);
+      renderAdminBulletinAndMaintenance();
+      renderHome();
+    } catch(e) {
+      alert('Gagal menghapus pengumuman dari server. Coba lagi.');
+    }
+  }
 }
 
 async function publishNewBulletinAction() {
