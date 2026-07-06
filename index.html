@@ -988,7 +988,8 @@ const DEFAULT_ROOMS = [
   {id:'r5',name:'Ruang Heritage 210',floor:1,capacity:30,color:'#E50914',image:'Heritage_210.png',location:'Gedung Heritage, Lantai 2',facilities:['Tv 75 inch','Kursi','Meja'],description:'Ruang pertemuan yang tepat untuk forum class atau pelatihan.'},
   {id:'r6',name:'Heritage 211',floor:1,capacity:30,color:'#E50914',image:'Heritage_211.png',location:'Gedung Heritage, Lantai 2',facilities:['Tv 75 inch','Kursi','Meja'],description:'Ruang pertemuan yang tepat untuk forum class atau pelatihan.'},
   {id:'r7',name:'Ruang Rapat 2',floor:1,capacity:14,color:'#E50914',image:'Ruang_Rapat_2.png',location:'Gedung A, Lantai 5',facilities:['Tv 75 inch','Kursi','Meja'],description:'Ruang pertemuan yang tepat untuk meeting internal atau meeting bersama vendor.'},
-  {id:'r8',name:'Ruang Rapat 3',floor:1,capacity:14,color:'#E50914',image:'Ruang_Rapat_3.png',location:'Gedung A, Lantai 5',facilities:['Tv 75 inch','Kursi','Meja'],description:'Ruang pertemuan yang tepat untuk meeting internal atau meeting bersama vendor.'}
+  {id:'r8',name:'Ruang Rapat 3',floor:1,capacity:14,color:'#E50914',image:'Ruang_Rapat_3.png',location:'Gedung A, Lantai 5',facilities:['Tv 75 inch','Kursi','Meja'],description:'Ruang pertemuan yang tepat untuk meeting internal atau meeting bersama vendor.'},
+  {id:'r9',name:'Lounge C',floor:1,capacity:30,color:'#E50914',image:'lounge_c.png',location:'Gedung C, Lantai 1 Lobby',facilities:['Tv 75 inch','Kursi','Meja','Speaker JBL Ultimate','Microphone JBL'],description:'Ruang meeting eksklusif.'}
 ];
 
 const FIREBASE_URL = "https://ruangkita-6eb3b-default-rtdb.asia-southeast1.firebasedatabase.app/";
@@ -1074,15 +1075,46 @@ async function fetchBookingsFromCloud() {
       }
     } catch(e) {}
 
+    // === SINKRONISASI BARU: Ambil Data Maintenance Terjadwal ===
+    try {
+      const cloudSchedRooms = await fbGet('rooms_scheduled_maintenance');
+      rooms.forEach(r => {
+        r.scheduledMaintenance = (cloudSchedRooms && cloudSchedRooms[r.id]) ? cloudSchedRooms[r.id] : [];
+      });
+    } catch(e) {
+      rooms.forEach(r => r.scheduledMaintenance = []);
+    }
+
     try {
       const savedWa = await fbGet('config/waNum');
       if (savedWa) waNum = savedWa;
     } catch(e) {}
 
+try {
+      const cloudRooms = await fbGet('rooms_maintenance'); // Memastikan data status maintenance terambil
+      const customRoomsData = await fbGet('rooms_data');
+      if (customRoomsData) {
+        rooms = Object.values(customRoomsData); // Mengganti data bawaan dengan data hasil upload dari Firebase
+        if (cloudRooms) {
+          rooms.forEach(r => {
+            if (cloudRooms[r.id] !== undefined) r.isMaintenance = cloudRooms[r.id];
+          });
+        }
+      }
+    } catch(e) {
+      console.log('Gagal memuat foto ruangan kustom dari cloud:', e);
+    }
 
-  await fetchUsersFromCloud();
+try {
+  const cloudSchedRooms = await fbGet('rooms_scheduled_maintenance');
+  rooms.forEach(r => {
+    r.scheduledMaintenance = (cloudSchedRooms && cloudSchedRooms[r.id]) ? cloudSchedRooms[r.id] : [];
+  });
+} catch(e) {
+  rooms.forEach(r => r.scheduledMaintenance = []);
+}
 
-
+    await fetchUsersFromCloud();
     checkAndSendBAReminders();
 
     if (document.getElementById('page-home').classList.contains('on')) renderHome();
@@ -1102,7 +1134,6 @@ async function fetchBookingsFromCloud() {
     console.error("Gagal sinkronisasi Firebase:", error);
   }
 }
-
 setInterval(() => { if (currentUser) fetchBookingsFromCloud(); }, 30000);
 let editId = null, selRoom = null;
 let canvas, ctx, isDrawing = false;
@@ -1193,31 +1224,20 @@ function renderAdminTable() {
 }
 
 function renderAdminMasterRooms() {
-  const isEditMode = editId !== null;
-  let currentRoom = { name: '', location: '', capacity: '', floor: '', facilities: [] };
-  if (isEditMode) { const found = rooms.find(r => r.id === editId); if (found) currentRoom = found; }
-  const facString = Array.isArray(currentRoom.facilities) ? currentRoom.facilities.join(', ') : '';
-
   let html = `
     <div class="fc" style="margin-top:20px;">
-      <div class="fc-title"><i class="ti ${isEditMode ? 'ti-edit' : 'ti-plus'}"></i> ${isEditMode ? 'Edit Master Ruangan' : 'Tambah Ruangan Baru'}</div>
-      <div class="form-grid">
-        <div class="fg"><label>Nama Ruangan *</label><input type="text" id="m-room-name" value="${currentRoom.name}"></div>
-        <div class="fg"><label>Blok Lokasi *</label><input type="text" id="m-room-loc" value="${currentRoom.location}"></div>
-        <div class="fg"><label>Kapasitas Maksimal *</label><input type="number" id="m-room-cap" value="${currentRoom.capacity}"></div>
-        <div class="fg"><label>Posisi Lantai *</label><input type="number" id="m-room-floor" value="${currentRoom.floor}"></div>
-        <div class="fg full"><label>Fasilitas Penunjang (Gunakan tanda koma pembatas) *</label><input type="text" id="m-room-fac" value="${facString}"></div>
-      </div>
-      <div class="form-actions" style="margin-top:15px;">
-        ${isEditMode ? `<button class="btn-sec" onclick="cancelEditMasterRoom()"><i class="ti ti-x"></i> Batal</button>` : ''}
-        <button class="btn-pri" onclick="saveMasterRoomAction()"><i class="ti ti-device-floppy"></i> Simpan Data</button>
-      </div>
+      <div class="fc-title"><i class="ti ti-list"></i> Daftar Master Ruangan</div>
+      <p style="font-size: 13px; color: var(--muted); margin-bottom: 10px;">
+        ⚠️ Penambahan, pengubahan, atau penghapusan data master ruangan telah dikunci dan hanya dapat dilakukan oleh Developer melalui modifikasi kode (Source Code).
+      </p>
     </div>
     <table class="at" style="width:100%; margin-top:20px;">
-      <thead><tr><th>Nama Ruangan</th><th>Blok Lokasi</th><th>Kapasitas</th><th>Aksi</th></tr></thead>
-      <tbody>${rooms.map(r => `<tr><td><b>${r.name}</b> (Lantai ${r.floor})</td><td>${r.location}</td><td>Maks ${r.capacity} Staf</td><td>
-        <div style="display:flex;gap:6px;"><button class="bic" onclick="startEditMasterRoom('${r.id}')"><i class="ti ti-edit"></i></button><button class="bic del" onclick="deleteMasterRoom('${r.id}')"><i class="ti ti-trash"></i></button></div>
-      </td></tr>`).join('')}</tbody>
+      <thead><tr><th>Nama Ruangan</th><th>Blok Lokasi</th><th>Kapasitas</th></tr></thead>
+      <tbody>${rooms.map(r => `<tr>
+        <td><b>${r.name}</b> (Lantai ${r.floor})</td>
+        <td>${r.location}</td>
+        <td>Maks ${r.capacity} Staf</td>
+      </tr>`).join('')}</tbody>
     </table>`;
   document.getElementById('t-rm').innerHTML = html;
 }
@@ -1925,6 +1945,16 @@ async function submit() {
   el.innerHTML = `<div class="al al-warn">⏳ Memeriksa ketersediaan ruangan secara real-time...</div>`;
   await fetchBookingsFromCloud();
 
+const targetRoomMaintenance = rooms.find(r => r.id === rid);
+if (targetRoomMaintenance && targetRoomMaintenance.scheduledMaintenance) {
+  if (targetRoomMaintenance.scheduledMaintenance.includes(date)) {
+    el.innerHTML = `<div class="al al-err">
+      ❌ <b>Booking Ditolak!</b> Ruangan <b>${targetRoomMaintenance.name}</b> tidak tersedia karena telah diajukan untuk <b>Jadwal Maintenance Terjadwal</b> pada tanggal ${fmtDate(date)}. Silakan pilih tanggal atau ruangan lain.
+    </div>`;
+    return;
+  }
+}
+
   const konflik = bookings.find(b => {
     if (b.roomId !== rid || b.date !== date) return false;
     return s < b.endTime && e > b.startTime;
@@ -2321,7 +2351,12 @@ function showTab(id) {
 }
 
 function renderAdminBulletinAndMaintenance() {
-  let html = `
+if (document.activeElement && 
+     (document.activeElement.id.startsWith('b-form-') || document.activeElement.id.startsWith('sched-date-'))) {
+    return; // Keluar dari fungsi, amankan ketikan admin!
+  }  
+
+let html = `
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
       
       <div class="fc">
@@ -2353,20 +2388,44 @@ function renderAdminBulletinAndMaintenance() {
       <div class="fc">
         <div class="fc-title"><i class="ti ti-toggle-left"></i> Saklar Mode Lock Maintenance Ruangan</div>
         <p style="font-size: 12px; color: var(--muted); margin-bottom: 15px;">Aktifkan saklar di bawah jika ruangan mengalami kendala teknis kelistrikan, AC bocor, or alat sound rusak agar dikunci dari pemesan.</p>
-        <div style="display: flex; flex-direction: column; gap: 10px;">`;
+        <div style="display: flex; flex-direction: column; gap: 14px;">`;
 
   rooms.forEach(r => {
     const isM = r.isMaintenance ? true : false;
+    const schedDates = r.scheduledMaintenance || [];
+    
     html += `
-      <div style="background:#262626; border:1px solid var(--bdr2); padding:12px 16px; border-radius:4px; display:flex; align-items:center; justify-content:space-between;">
-        <div>
-          <b style="font-size:14px; color:#fff; display:block;">${r.name}</b>
-          <span style="font-size:12px; color:${isM?'var(--err)':'var(--ok)'};">${isM?'🔒 Sedang Pemeliharaan (Locked)':'✓ Berfungsi Normal (Active)'}</span>
+      <div style="background:#262626; border:1px solid var(--bdr2); padding:14px; border-radius:4px; display:flex; flex-direction:column; gap:10px;">
+        <div style="display:flex; align-items:center; justify-content:space-between;">
+          <div>
+            <b style="font-size:14px; color:#fff; display:block;">${r.name}</b>
+            <span style="font-size:12px; color:${isM?'var(--err)':'var(--ok)'};">${isM?'🔒 Sedang Pemeliharaan (Locked)':'✓ Berfungsi Normal (Active)'}</span>
+          </div>
+          <div style="display:flex; gap:6px;">
+            <button onclick="toggleRoomMaintenanceAction('${r.id}', ${isM})" class="btn-pri" style="background:${isM?'var(--ok)':'var(--err)'}; padding:6px 12px; font-size:11.5px; border-radius:3px; height:auto;">
+              <i class="ti ${isM?'ti-power':'ti-tool'}"></i> ${isM?'Aktifkan':'Lock Instan'}
+            </button>
+          </div>
         </div>
-        <div>
-          <button onclick="toggleRoomMaintenanceAction('${r.id}', ${isM})" class="btn-pri" style="background:${isM?'var(--ok)':'var(--err)'}; padding:6px 14px; font-size:12px; border-radius:3px;">
-            <i class="ti ${isM?'ti-power':'ti-tool'}"></i> ${isM?'Aktifkan Ruang':'Lock Maintenance'}
-          </button>
+        
+        <div style="border-top: 1px dashed #404040; padding-top: 8px; display:flex; flex-direction:column; gap:6px;">
+          <label style="font-size:11px; color:var(--muted); font-weight:700;">LOCK TANGGAL TERTENTU (MAINTENANCE TERJADWAL):</label>
+          <div style="display:flex; gap:6px;">
+            <input type="date" id="sched-date-${r.id}" style="padding:5px 8px; font-size:12px; background:#181818; color:#fff; border:1px solid var(--bdr2); border-radius:3px; flex:1;">
+            <button onclick="addScheduledMaintenanceAction('${r.id}')" class="btn-pri" style="background:var(--warn); color:#141414; padding:5px 10px; font-size:11.5px; border-radius:3px; font-weight:700;">
+              <i class="ti ti-calendar-plus"></i> Lock Terjadwal
+            </button>
+          </div>
+          ${schedDates.length > 0 ? `
+            <div style="display:flex; flex-wrap:wrap; gap:4px; margin-top:4px;">
+              ${schedDates.map(dt => `
+                <span style="font-size:11px; background:rgba(245,166,35,0.15); color:var(--warn); padding:2px 6px; border-radius:2px; display:inline-flex; align-items:center; gap:4px; border:1px solid rgba(245,166,35,0.3)">
+                  📅 ${dt} 
+                  <i class="ti ti-x" style="cursor:pointer; color:var(--err);" onclick="removeScheduledMaintenanceAction('${r.id}', '${dt}')" title="Hapus Lock"></i>
+                </span>
+              `).join('')}
+            </div>
+          ` : ''}
         </div>
       </div>`;
   });
@@ -2393,7 +2452,6 @@ function renderAdminBulletinAndMaintenance() {
           
   document.getElementById('t-bulletin-maint').innerHTML = html;
 }
-
 async function deleteBulletinAction(fbKey) {
   if (!currentUser || currentUser.role !== 'admin') {
     alert('Akses Ditolak: Hanya Admin GA yang dapat menghapus pengumuman!');
@@ -2468,6 +2526,52 @@ async function toggleRoomMaintenanceAction(roomId, currentStatus) {
     fetchBookingsFromCloud(); 
   } catch(e) {
     alert('Gagal mengunci ruangan di cloud server.');
+  }
+}
+
+async function addScheduledMaintenanceAction(roomId) {
+  const dateInput = document.getElementById(`sched-date-${roomId}`);
+  if (!dateInput || !dateInput.value) {
+    alert("Silakan tentukan tanggal maintenance terlebih dahulu.");
+    return;
+  }
+  
+  const selectedDate = dateInput.value;
+  const targetRoom = rooms.find(r => r.id === roomId);
+  if (!targetRoom) return;
+
+  if (!targetRoom.scheduledMaintenance) targetRoom.scheduledMaintenance = [];
+  
+  if (targetRoom.scheduledMaintenance.includes(selectedDate)) {
+    alert("Tanggal tersebut sudah masuk dalam daftar lock maintenance ruangan ini.");
+    return;
+  }
+
+  targetRoom.scheduledMaintenance.push(selectedDate);
+
+  try {
+    await fbPut(`rooms_scheduled_maintenance/${roomId}`, targetRoom.scheduledMaintenance);
+    alert(`Sukses mengunci ${targetRoom.name} khusus pada tanggal ${selectedDate}!`);
+    fetchBookingsFromCloud(); 
+  } catch(e) {
+    alert('Gagal menyimpan jadwal lock ke cloud server.');
+  }
+}
+
+async function removeScheduledMaintenanceAction(roomId, targetDate) {
+  const targetRoom = rooms.find(r => r.id === roomId);
+  if (!targetRoom || !targetRoom.scheduledMaintenance) return;
+
+  if (confirm(`Buka kembali akses booking untuk tanggal ${targetDate}?`)) {
+    targetRoom.scheduledMaintenance = targetRoom.scheduledMaintenance.filter(d => d !== targetDate);
+
+    try {
+      await fbPut(`rooms_scheduled_maintenance/${roomId}`, targetRoom.scheduledMaintenance);
+      alert('Kunci tanggal berhasil dihapus.');
+      fetchBookingsFromCloud();
+    } catch(e) {
+      alert('Gagal memperbarui database di cloud server.');
+    }
   }
 }
 
@@ -2592,6 +2696,42 @@ document.getElementById('ai-input')?.addEventListener('keypress', function(e) { 
 
 fetchBookingsFromCloud();
 checkSession();
+
+document.getElementById('f-date')?.addEventListener('change', function() {
+  const rid = document.getElementById('f-room').value;
+  const dateValue = this.value;
+  const alertEl = document.getElementById('form-alert');
+  if (!rid || !dateValue) return;
+  
+  const targetRoom = rooms.find(r => r.id === rid);
+  if (targetRoom && targetRoom.scheduledMaintenance) {
+    if (targetRoom.scheduledMaintenance.includes(dateValue)) {
+      alertEl.innerHTML = `<div class="al al-err">
+        ⚠️ <b>Peringatan GA:</b> Ruangan <b>${targetRoom.name}</b> dijadwalkan untuk MAINTENANCE pada tanggal ini. Anda tidak akan bisa mengirim berkas pengajuan ini.
+      </div>`;
+      return;
+    }
+  }
+  if (alertEl.innerHTML.includes('MAINTENANCE')) alertEl.innerHTML = '';
+});
+
+document.getElementById('f-room')?.addEventListener('change', function() {
+  const dateEl = document.getElementById('f-date');
+  const alertEl = document.getElementById('form-alert');
+  if (!dateEl || !dateEl.value || !this.value) return;
+  
+  const targetRoom = rooms.find(r => r.id === this.value);
+  if (targetRoom && targetRoom.scheduledMaintenance) {
+    if (targetRoom.scheduledMaintenance.includes(dateEl.value)) {
+      alertEl.innerHTML = `<div class="al al-err">
+        ⚠️ <b>Peringatan GA:</b> Ruangan <b>${targetRoom.name}</b> dijadwalkan untuk MAINTENANCE pada tanggal ini. Anda tidak akan bisa mengirim berkas pengajuan ini.
+      </div>`;
+      return;
+    }
+  }
+  if (alertEl.innerHTML.includes('MAINTENANCE')) alertEl.innerHTML = '';
+});
+
 </script>
 </body>
 </html>
