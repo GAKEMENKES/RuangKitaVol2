@@ -1224,20 +1224,43 @@ function renderAdminTable() {
 }
 
 function renderAdminMasterRooms() {
+
+if (document.activeElement && 
+     (document.activeElement.id.startsWith('m-room-') || document.activeElement.id === 'm-room-file')) {
+    return; // Keluar dari fungsi, amankan ketikan admin!
+  }
+
+  const isEditMode = editId !== null;
+  let currentRoom = { name: '', location: '', capacity: '', floor: '', facilities: [] };
+  if (isEditMode) { const found = rooms.find(r => r.id === editId); if (found) currentRoom = found; }
+  const facString = Array.isArray(currentRoom.facilities) ? currentRoom.facilities.join(', ') : '';
+
   let html = `
     <div class="fc" style="margin-top:20px;">
-      <div class="fc-title"><i class="ti ti-list"></i> Daftar Master Ruangan</div>
-      <p style="font-size: 13px; color: var(--muted); margin-bottom: 10px;">
-        ⚠️ Penambahan, pengubahan, atau penghapusan data master ruangan telah dikunci dan hanya dapat dilakukan oleh Developer melalui modifikasi kode (Source Code).
-      </p>
+      <div class="fc-title"><i class="ti ${isEditMode ? 'ti-edit' : 'ti-plus'}"></i> ${isEditMode ? 'Edit Master Ruangan' : 'Tambah Ruangan Baru'}</div>
+      <div class="form-grid">
+        <div class="fg"><label>Nama Ruangan *</label><input type="text" id="m-room-name" value="${currentRoom.name}"></div>
+        <div class="fg"><label>Blok Lokasi *</label><input type="text" id="m-room-loc" value="${currentRoom.location}"></div>
+        <div class="fg"><label>Kapasitas Maksimal *</label><input type="number" id="m-room-cap" value="${currentRoom.capacity}"></div>
+        <div class="fg"><label>Posisi Lantai *</label><input type="number" id="m-room-floor" value="${currentRoom.floor}"></div>
+<div class="fg full">
+  <label>Upload Foto Ruangan (Format: JPG/PNG, Maks 500KB) *</label>
+  <input type="file" id="m-room-file" accept="image/*" style="padding: 8px 14px;">
+  <input type="hidden" id="m-room-img-hidden" value="${currentRoom.image || ''}">
+  ${currentRoom.image ? `<div style="margin-top:5px; font-size:11px; color:var(--ok);">✓ Sudah ada foto tersimpan</div>` : ''}
+</div>
+        <div class="fg full"><label>Fasilitas Penunjang (Gunakan tanda koma pembatas) *</label><input type="text" id="m-room-fac" value="${facString}"></div>
+      </div>
+      <div class="form-actions" style="margin-top:15px;">
+        ${isEditMode ? `<button class="btn-sec" onclick="cancelEditMasterRoom()"><i class="ti ti-x"></i> Batal</button>` : ''}
+        <button class="btn-pri" onclick="saveMasterRoomAction()"><i class="ti ti-device-floppy"></i> Simpan Data</button>
+      </div>
     </div>
     <table class="at" style="width:100%; margin-top:20px;">
-      <thead><tr><th>Nama Ruangan</th><th>Blok Lokasi</th><th>Kapasitas</th></tr></thead>
-      <tbody>${rooms.map(r => `<tr>
-        <td><b>${r.name}</b> (Lantai ${r.floor})</td>
-        <td>${r.location}</td>
-        <td>Maks ${r.capacity} Staf</td>
-      </tr>`).join('')}</tbody>
+      <thead><tr><th>Nama Ruangan</th><th>Blok Lokasi</th><th>Kapasitas</th><th>Aksi</th></tr></thead>
+      <tbody>${rooms.map(r => `<tr><td><b>${r.name}</b> (Lantai ${r.floor})</td><td>${r.location}</td><td>Maks ${r.capacity} Staf</td><td>
+        <div style="display:flex;gap:6px;"><button class="bic" onclick="startEditMasterRoom('${r.id}')"><i class="ti ti-edit"></i></button><button class="bic del" onclick="deleteMasterRoom('${r.id}')"><i class="ti ti-trash"></i></button></div>
+      </td></tr>`).join('')}</tbody>
     </table>`;
   document.getElementById('t-rm').innerHTML = html;
 }
@@ -2591,6 +2614,72 @@ function saveWhatsAppConfig() {
     .catch(() => alert('Gagal menyimpan ke server.'));
 }
 
+// === TAMBAHKAN FUNGSI BARU INI ===
+async function saveMasterRoomAction() {
+  const name = document.getElementById('m-room-name').value.trim();
+  const loc = document.getElementById('m-room-loc').value.trim();
+  const cap = parseInt(document.getElementById('m-room-cap').value);
+  const floor = parseInt(document.getElementById('m-room-floor').value);
+  const facInput = document.getElementById('m-room-fac').value.trim();
+  const fileInput = document.getElementById('m-room-file');
+  const hiddenImg = document.getElementById('m-room-img-hidden').value;
+
+  if (!name || !loc || !cap || !floor || !facInput) {
+    alert('Mohon lengkapi seluruh field data master yang wajib!');
+    return;
+  }
+
+  const facArray = facInput.split(',').map(f => f.trim()).filter(f => f !== '');
+  
+  const readAsBase64 = (file) => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.readAsDataURL(file);
+    });
+  }; 
+
+  let finalImageUrl = hiddenImg || 'default_room.png';
+
+  if (fileInput && fileInput.files.length > 0) {
+    const file = fileInput.files[0];
+    if (file.size > 5250000) { 
+      alert('Ukuran gambar terlalu besar! Maksimal 500KB. Kompres foto Anda terlebih dahulu.');
+      return;
+    }
+    finalImageUrl = await readAsBase64(file);
+  }
+
+  const targetId = editId || 'r' + Date.now();
+  const targetRoomData = {
+    id: targetId,
+    name: name,
+    location: loc,
+    capacity: cap,
+    floor: floor,
+    facilities: facArray,
+    image: finalImageUrl,
+    description: rooms.find(x => x.id === editId)?.description || 'Ruang pertemuan operasional.'
+  };
+
+  try {
+    await fbPut(`rooms_data/${targetId}`, targetRoomData);
+    
+    if (editId) {
+      rooms = rooms.map(r => r.id === editId ? { ...r, ...targetRoomData } : r);
+      editId = null;
+    } else {
+      rooms.push(targetRoomData);
+    }
+    
+    alert('Data master dan foto ruangan berhasil disinkronkan ke server cloud!');
+    renderAdminMasterRooms();
+    renderRooms();
+  } catch(e) {
+    alert('Gagal menyimpan data ruangan ke cloud server database.');
+  }
+}
+// =================================
 function renderAdminExport() {
   document.getElementById('t-ex').innerHTML = `
     <div class="fc" style="margin-top:20px;">
