@@ -2821,6 +2821,29 @@ document.getElementById('f-room')?.addEventListener('change', function() {
   if (alertEl.innerHTML.includes('MAINTENANCE')) alertEl.innerHTML = '';
 });
 
+function startEditMasterRoom(id) {
+  editId = id;
+  renderAdminMasterRooms();
+}
+
+function cancelEditMasterRoom() {
+  editId = null;
+  renderAdminMasterRooms();
+}
+
+async function deleteMasterRoom(id) {
+  if (confirm('Hapus master ruangan ini?')) {
+    try {
+      await fbDelete(`rooms_data/${id}`);
+      rooms = rooms.filter(r => r.id !== id);
+      alert('Ruangan berhasil dihapus!');
+      renderAdminMasterRooms();
+      renderRooms();
+    } catch(e) {
+      alert('Gagal menghapus ruangan.');
+    }
+  }
+}
 </script>
 </body>
 </html>
