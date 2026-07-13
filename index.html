@@ -95,7 +95,7 @@ body::after{
 .stat-sub{font-size:12px;color:#777777;margin-top:4px}
 
 .sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;margin-top:1rem}
-.st Slide{font-size:20px;font-weight:700;color:#e5e5e5}
+.st{font-size:20px;font-weight:700;color:#e5e5e5}
 .st small{display:inline-block;font-size:13px;color:var(--muted);font-weight:400;margin-left:15px;border-left:1px solid #404040;padding-left:15px}
 
 .today-wrap{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:2.5rem}
@@ -330,8 +330,25 @@ body::after{
 .at td{background:rgba(24,24,24,0.8);color:#eee;border-bottom:1px solid var(--bdr);padding:10px}
 
 @media print{
-  .topbar,.print-actions,.back-btn,.nb,.btn-pri,.btn-sec,.btn-wa,.btn-gold,.btn-ghost,.al,.tbar{display:none!important}
+  .topbar,.print-actions,.back-btn,.nb,.btn-pri,.btn-sec,.btn-wa,.btn-gold,.btn-ghost,.al,.tbar,.fab-help{display:none!important}
+  
   body::before, body::after{display:none!important}
+body {
+    background-color: #ffffff !important;
+  }
+  
+  /* Menghilangkan padding halaman default layar */
+  .page {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Menghilangkan efek bayangan (shadow) dan lengkungan (radius) pada kertas form */
+  .pfw {
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    border: none !important;
+  }
 }
 
 @media (max-width: 768px) {
@@ -585,11 +602,34 @@ body::after{
         <input type="text" id="reg-name" placeholder="Nama Lengkap Pemohon">
       </div>
       <div class="fg">
+        <div class="fg">
         <label>Unit Kerja / Departemen *</label>
-        <input type="text" id="reg-dept" placeholder="Contoh: IT, GA, Keperawatan, Marketing">
+        <select id="reg-dept">
+          <option value="">— Pilih Unit Kerja / Departemen —</option>
+          <option value="Sekretaris Direksi">Sekretaris Direksi</option>
+          <option value="Sekretaris Departement Medik">Sekretaris Departement Medik</option>
+          <option value="SDM">SDM</option>
+          <option value="Diklat">Diklat</option>
+          <option value="Peneliti">Peneliti</option>
+          <option value="Finance">Finance</option>
+          <option value="Pengadaan">Pengadaan</option>
+          <option value="Akuntan & BMN">Akuntan & BMN</option>
+          <option value="Bendahara">Bendahara</option>
+          <option value="Perencanaan">Perencanaan</option>
+          <option value="General Affair">General Affair</option>
+          <option value="IT">IT</option>
+          <option value="Marketing">Marketing</option>
+          <option value="Operasional">Operasional</option>
+          <option value="Radiologi">Radiologi</option>
+          <option value="Farmasi">Farmasi</option>
+          <option value="Elektromedis">Elektromedis</option>
+          <option value="Keperawatan">Keperawatan</option>
+          <option value="Laboratorium">Laboratorium</option>
+        </select>
+      </div>
       </div>
       <div class="fg">
-        <label>Alamat Email Umum *</label>
+        <label>Alamat Email*</label>
         <input type="text" id="reg-email" placeholder="contoh@gmail.com">
       </div>
       <div class="fg">
@@ -804,7 +844,28 @@ body::after{
       </div>
       <div class="fg">
         <label>Unit Kerja / Departemen</label>
-        <input type="text" id="edit-acc-dept">
+        <select id="edit-acc-dept">
+          <option value="">— Pilih Unit Kerja / Departemen —</option>
+          <option value="Sekretaris Direksi">Sekretaris Direksi</option>
+          <option value="Sekretaris Departement Medik">Sekretaris Departement Medik</option>
+          <option value="SDM">SDM</option>
+          <option value="Diklat">Diklat</option>
+          <option value="Peneliti">Peneliti</option>
+          <option value="Finance">Finance</option>
+          <option value="Pengadaan">Pengadaan</option>
+          <option value="Akuntan & BMN">Akuntan & BMN</option>
+          <option value="Bendahara">Bendahara</option>
+          <option value="Perencanaan">Perencanaan</option>
+          <option value="General Affair">General Affair</option>
+          <option value="IT">IT</option>
+          <option value="Marketing">Marketing</option>
+          <option value="Operasional">Operasional</option>
+          <option value="Radiologi">Radiologi</option>
+          <option value="Farmasi">Farmasi</option>
+          <option value="Elektromedis">Elektromedis</option>
+          <option value="Keperawatan">Keperawatan</option>
+          <option value="Laboratorium">Laboratorium</option>
+        </select>
       </div>
       <div style="font-size: 11.5px; color: var(--muted); line-height: 1.4;">
         * Setelah data disimpan, sapaan di beranda utama dan data otomatis pengajuan formulir baru akan langsung diperbarui.
@@ -823,7 +884,7 @@ body::after{
       <h3 style="font-weight: 800; font-size: 18px; color: #fff;" id="ba-title">
         <i class="ti ti-clipboard-check" style="color: var(--acc); margin-right: 8px;"></i>Berita Acara Digital
       </h3>
-      <button class="ai-x" onclick="closeBAModal()">&times;</button>
+      <button class="ai-x" onclick="closeBAModal()" style="background:none; border:none; color:var(--muted); font-size:22px; cursor:pointer;">&times;</button>
     </div>
     <div id="ba-form-content"></div>
   </div>
@@ -855,7 +916,7 @@ body::after{
 
       <div class="help-content-area">
   
-  <!-- PANE: AI ASISTEN (Tetap sama seperti sebelumnya) -->
+  <!-- PANE: AI ASISTEN -->
   <div class="help-content-pane active" id="pane-ai">
     <h4>🤖 RuangKita Smart AI</h4>
     <p style="font-size: 12px; color: var(--muted); margin-bottom: 8px;">Tanyakan apa saja seputar operasional logistik atau kendala ruangan.</p>
@@ -868,7 +929,7 @@ body::after{
     </div>
   </div>
 
-  <!-- PANE: WHATSAPP ADMIN GA (Tetap sama seperti sebelumnya) -->
+  <!-- PANE: WHATSAPP ADMIN GA -->
   <div class="help-content-pane" id="pane-wa">
     <h4>💬 Koordinasi Cepat via WhatsApp</h4>
     <p style="margin-bottom: 15px;">Jika Anda memerlukan bantuan fisik mendesak, silakan hubungi langsung Admin General Affairs.</p>
@@ -877,7 +938,7 @@ body::after{
     </button>
   </div>
 
-<!-- PANE: PANDUAN SOP PENGGUNAAN RUANGAN(BERUBAH MENJADI TOMBOL PDF) -->
+  <!-- PANE: PANDUAN SOP PENGGUNAAN RUANGAN -->
   <div class="help-content-pane" id="pane-Document">
     <h4>📋 Dokumen SOP Penggunaan Ruangan</h4>
     <div style="background: #262626; border: 1px solid var(--bdr2); padding: 25px; border-radius: var(--r); text-align: center; margin-top: 15px;">
@@ -890,7 +951,7 @@ body::after{
     </div>
   </div>
 
-  <!-- PANE: PANDUAN PENGGUNAAN WEB (BERUBAH MENJADI TOMBOL PDF) -->
+  <!-- PANE: PANDUAN PENGGUNAAN WEB -->
   <div class="help-content-pane" id="pane-web">
     <h4>🌐 Dokumen Panduan Sistem Web</h4>
     <div style="background: #262626; border: 1px solid var(--bdr2); padding: 25px; border-radius: var(--r); text-align: center; margin-top: 15px;">
@@ -903,7 +964,7 @@ body::after{
     </div>
   </div>
 
-  <!-- PANE: PANDUAN MENYALAKAN MIC (BERUBAH MENJADI TOMBOL PDF) -->
+  <!-- PANE: PANDUAN MENYALAKAN MIC -->
   <div class="help-content-pane" id="pane-mic">
     <h4>🎤 Dokumen Panduan Sound System & Microphone</h4>
     <div style="background: #262626; border: 1px solid var(--bdr2); padding: 25px; border-radius: var(--r); text-align: center; margin-top: 15px;">
@@ -916,7 +977,7 @@ body::after{
     </div>
   </div>
 
-  <!-- PANE: PANDUAN MENYALAKAN VIDEOTRON (BERUBAH MENJADI TOMBOL PDF) -->
+  <!-- PANE: PANDUAN MENYALAKAN VIDEOTRON -->
   <div class="help-content-pane" id="pane-vtron">
     <h4>🖥️ Dokumen Panduan Sistem Videotron</h4>
     <div style="background: #262626; border: 1px solid var(--bdr2); padding: 25px; border-radius: var(--r); text-align: center; margin-top: 15px;">
@@ -929,7 +990,7 @@ body::after{
     </div>
   </div>
 
-  <!-- PANE: PANDUAN MENYALAKAN TV (BERUBAH MENJADI TOMBOL PDF) -->
+  <!-- PANE: PANDUAN MENYALAKAN TV -->
   <div class="help-content-pane" id="pane-tv">
     <h4>📺 Dokumen Panduan TV Room & Teleconference</h4>
     <div style="background: #262626; border: 1px solid var(--bdr2); padding: 25px; border-radius: var(--r); text-align: center; margin-top: 15px;">
@@ -959,7 +1020,7 @@ function exploreRoomsFirst() {
 // INISIALISASI EMAILJS (UBAH DENGAN API KEY-MU)
 // ==========================================
 (function(){
-    emailjs.init("YJM2scwjksvI69hhJ"); // <-- Ganti dengan Public Key EmailJS kamu!
+    emailjs.init("YJM2scwjksvI69hhJ"); 
 })();
 
 function sendSystemEmail(to_email, subject, message) {
@@ -971,7 +1032,6 @@ function sendSystemEmail(to_email, subject, message) {
         message: message
     };
     
-    // Ganti "YOUR_SERVICE_ID" dan "YOUR_TEMPLATE_ID" sesuai dengan konfigurasi EmailJS-mu
     emailjs.send('service_t0tlfgn', 'template_8d3c5gp', templateParams)
         .then(function(response) {
            console.log('Email berhasil terkirim!', response.status, response.text);
@@ -998,7 +1058,6 @@ let rooms = JSON.parse(localStorage.getItem('rb_rooms') || 'null') || DEFAULT_RO
 let bookings = [];
 let bulletins = [];
 let waNum = '';
-// Users sekarang disinkronisasi langsung dari cloud
 let users = [
   { email: 'bagusssrya@gmail.com', pass: 'pancasewandani', name: 'Bagus Surya', dept: 'General Affairs', role: 'admin' },
   { email: 'admin', pass: 'admin123', name: 'Admin Utama GA', dept: 'General Affairs', role: 'admin' },
@@ -1006,6 +1065,9 @@ let users = [
 ]; 
 let currentUser = JSON.parse(localStorage.getItem('rb_current_user')) || null;
 let currentLoginRole = 'user';
+
+// Variabel Global Kanvas BA
+let baCanvas, baCtx, baIsDrawing = false, baHasDrawn = false;
 
 async function fbGet(path) {
   const res = await fetch(`${FIREBASE_URL}${path}.json`); 
@@ -1032,13 +1094,7 @@ async function fbPut(path, data) {
     method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data)
   });
 }
-async function fbPut(path, data) {
-  await fetch(`${FIREBASE_URL}/${path}.json`, {
-    method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data)
-  });
-}
 
-// FUNGSI BARU: Ambil user dari Cloud Database
 async function fetchUsersFromCloud() {
     try {
         const data = await fbGet('users');
@@ -1075,7 +1131,6 @@ async function fetchBookingsFromCloud() {
       }
     } catch(e) {}
 
-    // === SINKRONISASI BARU: Ambil Data Maintenance Terjadwal ===
     try {
       const cloudSchedRooms = await fbGet('rooms_scheduled_maintenance');
       rooms.forEach(r => {
@@ -1091,10 +1146,10 @@ async function fetchBookingsFromCloud() {
     } catch(e) {}
 
 try {
-      const cloudRooms = await fbGet('rooms_maintenance'); // Memastikan data status maintenance terambil
+      const cloudRooms = await fbGet('rooms_maintenance'); 
       const customRoomsData = await fbGet('rooms_data');
       if (customRoomsData) {
-        rooms = Object.values(customRoomsData); // Mengganti data bawaan dengan data hasil upload dari Firebase
+        rooms = Object.values(customRoomsData); 
         if (cloudRooms) {
           rooms.forEach(r => {
             if (cloudRooms[r.id] !== undefined) r.isMaintenance = cloudRooms[r.id];
@@ -1104,15 +1159,6 @@ try {
     } catch(e) {
       console.log('Gagal memuat foto ruangan kustom dari cloud:', e);
     }
-
-try {
-  const cloudSchedRooms = await fbGet('rooms_scheduled_maintenance');
-  rooms.forEach(r => {
-    r.scheduledMaintenance = (cloudSchedRooms && cloudSchedRooms[r.id]) ? cloudSchedRooms[r.id] : [];
-  });
-} catch(e) {
-  rooms.forEach(r => r.scheduledMaintenance = []);
-}
 
     await fetchUsersFromCloud();
     checkAndSendBAReminders();
@@ -1130,6 +1176,18 @@ try {
         else if (activeOnClick.includes('t-ex')) renderAdminExport();
       }
     }
+
+    // --- TAMBAHAN BARU: Menangkap klik link dari File Excel ---
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('action') === 'printBA') {
+       // Otomatis membuka halaman Cetak Berita Acara sesuai ID dan Type dari URL Excel
+       viewPrintBA(urlParams.get('id'), urlParams.get('type'));
+       
+       // Membersihkan URL baris atas agar rapi kembali
+       window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    // ----------------------------------------------------------
+
   } catch (error) {
     console.error("Gagal sinkronisasi Firebase:", error);
   }
@@ -1187,6 +1245,58 @@ function clearSignature() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
 
+// ----------------- FUNGSI KANVAS TTD BERITA ACARA -----------------
+function initBASignaturePad() {
+  baCanvas = document.getElementById('ba-signature-pad');
+  if (!baCanvas) return;
+  baCtx = baCanvas.getContext('2d');
+  baCanvas.width = baCanvas.offsetWidth;
+  baCanvas.height = baCanvas.offsetHeight;
+  baCtx.strokeStyle = '#ffffff';
+  baCtx.lineWidth = 3;
+  baCtx.lineCap = 'round';
+  baCtx.lineJoin = 'round';
+  baHasDrawn = false; // Reset status
+
+  baCanvas.addEventListener('mousedown', (e) => { baIsDrawing = true; baHasDrawn = true; drawBA(e); });
+  baCanvas.addEventListener('mousemove', drawBA);
+  baCanvas.addEventListener('mouseup', () => { baIsDrawing = false; baCtx.beginPath(); });
+  baCanvas.addEventListener('mouseout', () => { baIsDrawing = false; baCtx.beginPath(); });
+
+  baCanvas.addEventListener('touchstart', (e) => {
+    baIsDrawing = true; baHasDrawn = true;
+    const touch = e.touches[0];
+    const rect = baCanvas.getBoundingClientRect();
+    baCtx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
+    e.preventDefault();
+  });
+  baCanvas.addEventListener('touchmove', (e) => {
+    if (!baIsDrawing) return;
+    const touch = e.touches[0];
+    const rect = baCanvas.getBoundingClientRect();
+    baCtx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top);
+    baCtx.stroke();
+    e.preventDefault();
+  });
+  baCanvas.addEventListener('touchend', () => { baIsDrawing = false; baCtx.beginPath(); });
+}
+
+function drawBA(e) {
+  if (!baIsDrawing) return;
+  const rect = baCanvas.getBoundingClientRect();
+  baCtx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+  baCtx.stroke();
+  baCtx.beginPath();
+  baCtx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+}
+
+function clearBASignature() {
+  if (!baCanvas) return;
+  baCtx.clearRect(0, 0, baCanvas.width, baCanvas.height);
+  baHasDrawn = false;
+}
+// -------------------------------------------------------------------
+
 function setRoleMode(formType, role) {
   if (formType === 'login') {
     currentLoginRole = role;
@@ -1224,10 +1334,9 @@ function renderAdminTable() {
 }
 
 function renderAdminMasterRooms() {
-
 if (document.activeElement && 
      (document.activeElement.id.startsWith('m-room-') || document.activeElement.id === 'm-room-file')) {
-    return; // Keluar dari fungsi, amankan ketikan admin!
+    return; 
   }
 
   const isEditMode = editId !== null;
@@ -1265,7 +1374,6 @@ if (document.activeElement &&
   document.getElementById('t-rm').innerHTML = html;
 }
 
-// PERUBAHAN MULTI-DEVICE: Menyimpan akun ke database Firebase
 async function handleRegister() {
   const name = document.getElementById('reg-name').value.trim();
   const dept = document.getElementById('reg-dept').value.trim();
@@ -1291,7 +1399,6 @@ async function handleRegister() {
   }
 }
 
-// PERUBAHAN MULTI-DEVICE: Mengecek akun dari cloud database
 async function handleLogin() {
   const email = document.getElementById('log-email').value.trim().toLowerCase();
   const pass = document.getElementById('log-pass').value;
@@ -1299,7 +1406,7 @@ async function handleLogin() {
 
   alertBox.innerHTML = `<div class="al al-warn" style="margin:0 0 15px 0">Memverifikasi Identitas...</div>`;
   
-  await fetchUsersFromCloud(); // Pastikan data user yang kita miliki itu terbaru dari device manapun
+  await fetchUsersFromCloud();
 
   const user = users.find(u => u.email === email && u.pass === pass);
   if (!user) {
@@ -1313,7 +1420,7 @@ async function handleLogin() {
 
   alertBox.innerHTML = `<div class="al al-ok" style="margin:0 0 15px 0">Berhasil Masuk! Mengalihkan...</div>`;
   currentUser = user;
-  localStorage.setItem('rb_current_user', JSON.stringify(currentUser)); // Sesi spesifik device
+  localStorage.setItem('rb_current_user', JSON.stringify(currentUser)); 
   setTimeout(() => checkSession(), 800);
 }
 
@@ -1345,7 +1452,6 @@ function handleLogout() {
   checkSession();
 }
 
-function save() { localStorage.setItem('rb_rooms', JSON.stringify(rooms)); localStorage.setItem('rb_bookings', JSON.stringify(bookings)); }
 function todayStr() { return new Date().toISOString().split('T')[0]; }
 function addDays(d, n) { const x = new Date(d + 'T00:00:00'); x.setDate(x.getDate() + n); return x.toISOString().split('T')[0]; }
 function fmtDate(d) {
@@ -1573,7 +1679,6 @@ async function checkAndSendBAReminders() {
     const startTimeInMinutes = (startH * 60) + startM;
     const endTimeInMinutes = (endH * 60) + endM;
 
-    // --- Reminder BA MASUK: window H-1 jam s.d. jam mulai, belum diisi, belum pernah dikirim ---
     if (!b.baCheckIn && !b.baInReminderSent) {
       const timeUntilStart = startTimeInMinutes - currentTimeInMinutes;
       if (timeUntilStart <= 60 && currentTimeInMinutes <= endTimeInMinutes) {
@@ -1587,7 +1692,6 @@ async function checkAndSendBAReminders() {
       }
     }
 
-    // --- Reminder BA KELUAR: sudah lewat endTime, BA masuk ada tapi BA keluar belum, belum pernah dikirim ---
     if (b.baCheckIn && !b.baCheckOut && !b.baOutReminderSent) {
       if (currentTimeInMinutes >= endTimeInMinutes) {
         sendSystemEmail(
@@ -1803,6 +1907,10 @@ function renderBookings() {
       deleteButtonHtml = `<button class="bic" style="opacity: 0.25; cursor: not-allowed;" title="Proteksi Akses" disabled><i class="ti ti-lock"></i></button>`;
     }
 
+    // TOMBOL 4 BUAH: BA In, BA Out, Cetak Formulir Utama, Hapus
+    let baInBtn = b.baCheckIn ? `<button class="bic" style="color:var(--ok); border-color:var(--ok);" onclick="viewPrintBA('${b.id}', 'in')" title="Cetak Form Berita Acara Masuk"><i class="ti ti-login"></i></button>` : '';
+    let baOutBtn = b.baCheckOut ? `<button class="bic" style="color:var(--warn); border-color:var(--warn);" onclick="viewPrintBA('${b.id}', 'out')" title="Cetak Form Berita Acara Keluar"><i class="ti ti-logout"></i></button>` : '';
+
     return `<div class="bi">
       <div class="dot a"></div>
       <div style="flex:1;min-width:0">
@@ -1814,7 +1922,9 @@ function renderBookings() {
       </div>
       <span class="sbadge" style="${badgeStyle}">${currentStatus}</span>
       <div class="bi-actions">
-        <button class="bic" onclick="viewPrint('${b.id}')" title="Cetak Berkas"><i class="ti ti-printer"></i></button>
+        ${baInBtn}
+        ${baOutBtn}
+        <button class="bic" onclick="viewPrint('${b.id}')" title="Cetak Surat Ijin Peminjaman"><i class="ti ti-file-text"></i></button>
         ${deleteButtonHtml}
       </div>
     </div>`;
@@ -1838,7 +1948,7 @@ function openBAModalOpen(id, type) {
     <p style="font-size:13px; color:var(--muted); margin-bottom:15px;">
       Verifikasi kondisi kelayakan inventaris ruangan demi transparansi aset kompartemen General Affairs RSUP Surabaya.
     </p>
-    <div style="display:flex; flex-direction:column; gap:10px; max-height:260px; overflow-y:auto; margin-bottom:15px; padding-right:5px;">
+    <div style="display:flex; flex-direction:column; gap:10px; max-height:220px; overflow-y:auto; margin-bottom:15px; padding-right:5px;">
   `;
 
   facs.forEach((f, idx) => {
@@ -1863,6 +1973,18 @@ function openBAModalOpen(id, type) {
       <label><b>KETERANGAN</b></label>
       <input type="text" id="ba-notes" placeholder="${type === 'in' ? 'Contoh: TV tidak menyala karena tidak ada kabel HDMI nya' : 'Contoh: AC & Lampu mati rapi, ruangan bersih'}">
     </div>
+
+    <!-- TANDA TANGAN WAJIB UNTUK BA -->
+    <div class="fg" style="margin-top:15px;">
+      <label style="color:var(--acc); font-weight:800;">TANDA TANGAN USER (WAJIB) *</label>
+      <div style="position: relative; background: #262626; border: 1px solid var(--bdr2); border-radius: var(--r); width: 100%; height: 140px; margin-top:5px;">
+        <canvas id="ba-signature-pad" style="width: 100%; height: 100%; cursor: crosshair; display: block;"></canvas>
+        <button type="button" class="btn-sec" onclick="clearBASignature()" style="position: absolute; bottom: 8px; right: 8px; padding: 4px 10px; font-size: 11px; height: auto;">
+          <i class="ti ti-refresh"></i> Bersihkan
+        </button>
+      </div>
+    </div>
+
     <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 22px;">
       <button class="btn-sec" onclick="closeBAModal()" style="padding: 10px 20px; font-size: 13px;">Batal</button>
       <button class="btn-pri" onclick="submitBAData()" style="padding: 10px 20px; font-size: 13px; background:${type==='in'?'var(--ok)':'var(--acc)'}; color:${type==='in'?'#141414':'#fff'};">
@@ -1873,6 +1995,9 @@ function openBAModalOpen(id, type) {
 
   document.getElementById('ba-form-content').innerHTML = html;
   document.getElementById('modal-ba-logistik').style.display = 'flex';
+
+  // Inisiasi Kanvas setelah DOM HTML berhasil disuntikkan
+  setTimeout(initBASignaturePad, 200);
 }
 
 function closeBAModal() {
@@ -1880,6 +2005,11 @@ function closeBAModal() {
 }
 
 function submitBAData() {
+  if (!baHasDrawn) {
+    alert("Maaf, Tanda Tangan Digital wajib Anda isi sebagai bentuk pertanggungjawaban!");
+    return;
+  }
+
   const idx = bookings.findIndex(x => x.id === activeBAId);
   if (idx === -1) return;
 
@@ -1891,23 +2021,52 @@ function submitBAData() {
   const timeNow = new Date().toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'});
 
   let fasilitasRusak = [];
+  let checklistData = [];
 
+  // Proses inputan checklist radio
   facs.forEach((f, idxFac) => {
     const radioElements = document.getElementsByName(`fac-${idxFac}`);
     if (radioElements && radioElements.length > 0) {
       const selectedValue = Array.from(radioElements).find(r => r.checked)?.value;
+      checklistData.push({ item: f, status: selectedValue });
+      
       if (selectedValue === 'Rusak/Masalah') {
         fasilitasRusak.push(f);
       }
     }
   });
 
+  // Proses Tanda Tangan (Sama seperti logika utama: konversi putih ke hitam agar jelas saat dicetak)
+  let ttdDataUrl = '';
+  if (baCanvas) {
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = baCanvas.width; tempCanvas.height = baCanvas.height;
+    const tempCtx = tempCanvas.getContext('2d');
+    tempCtx.lineWidth = 3; tempCtx.lineCap = 'round'; tempCtx.lineJoin = 'round'; tempCtx.strokeStyle = '#111111';
+    tempCtx.drawImage(baCanvas, 0, 0);
+    const imgData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+    for (let i = 0; i < imgData.data.length; i += 4) {
+      if (imgData.data[i] > 200 && imgData.data[i+1] > 200 && imgData.data[i+2] > 200) {
+        imgData.data[i] = 17; imgData.data[i+1] = 17; imgData.data[i+2] = 17;
+      }
+    }
+    tempCtx.putImageData(imgData, 0, 0);
+    ttdDataUrl = tempCanvas.toDataURL('image/png');
+  }
+
+  const baObjData = {
+    time: timeNow, 
+    notes: note || (baType === 'in' ? 'Fasilitas diverifikasi melalui sistem.' : 'Ruangan dikembalikan.'),
+    checklist: checklistData,
+    signature: ttdDataUrl
+  };
+
   if (baType === 'in') {
-    bookings[idx].baCheckIn = { time: timeNow, notes: note || 'Fasilitas diverifikasi melalui sistem.' };
-    alert('Berita Acara Masuk Berhasil Dikunci! Selamat melakukan agenda rapat.');
+    bookings[idx].baCheckIn = baObjData;
+    alert('Berita Acara Masuk Berhasil Dikunci! Formulir BA sudah tersimpan di Riwayat Jadwal.');
   } else {
-    bookings[idx].baCheckOut = { time: timeNow, notes: note || 'Ruangan dikembalikan.' };
-    alert('Berita Acara Keluar Berhasil Direkam!');
+    bookings[idx].baCheckOut = baObjData;
+    alert('Berita Acara Keluar Berhasil Direkam! Formulir BA sudah tersimpan di Riwayat Jadwal.');
   }
 
   // ==========================================
@@ -2135,6 +2294,90 @@ async function delBk(id) {
     }
   }
 }
+
+// ----------------- FUNGSI CETAK BERITA ACARA (BARU) -----------------
+function viewPrintBA(id, type) {
+  const b = bookings.find(x => x.id === id); if (!b) return;
+  const baData = type === 'in' ? b.baCheckIn : b.baCheckOut;
+  if (!baData) return;
+
+  const judul = type === 'in' ? 'BERITA ACARA SERAH TERIMA MASUK' : 'BERITA ACARA SERAH TERIMA KELUAR';
+  const warnaJudul = type === 'in' ? 'var(--ok)' : 'var(--warn)';
+
+  let checklistHtml = baData.checklist ? baData.checklist.map(c => `
+    <tr>
+      <td style="border:1px solid #dcdcdc; padding:8px;">${c.item}</td>
+      <td style="border:1px solid #dcdcdc; padding:8px; font-weight:700; color:${c.status === 'Bagus' ? '#46d369' : '#e50914'};">
+        ${c.status === 'Bagus' ? '✓ Tersedia/Berfungsi' : '❌ Rusak/Masalah'}
+      </td>
+    </tr>
+  `).join('') : '<tr><td colspan="2" style="border:1px solid #dcdcdc; padding:8px; text-align:center;">Data spesifikasi kondisi fisik lama tidak tersimpan secara mendetail.</td></tr>';
+
+  document.getElementById('print-content').innerHTML = `
+    <div class="ph" style="background: #ffffff; color: #141414; padding: 30px; border-bottom: 3px solid #141414; display: flex; align-items: center; gap: 20px;">
+      <img src="Logo_RS.png" alt="Logo Kemenkes" style="width: auto; height: 75px; object-fit: contain; flex-shrink: 0;">
+      <div style="flex: 1; text-align: left;">
+        <h2 style="font-size: 19px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: #141414; margin-bottom: 4px;">KEMENTERIAN KESEHATAN REPUBLIK INDONESIA</h2>
+        <h3 style="font-size: 15px; font-weight: 700; color: #333; margin-bottom: 2px;">DIREKTORAT JENDERAL PELAYANAN KESEHATAN</h3>
+        <h4 style="font-size: 14px; font-weight: 700; color: var(--acc); margin-bottom: 4px;">RSUP KEMENKES SURABAYA</h4>
+      </div>
+    </div>
+    <div class="pb" style="padding: 35px; background: #ffffff; color: #141414; font-family: var(--font);">
+      <div style="text-align: center; margin-bottom: 30px;">
+        <h3 style="font-size: 18px; font-weight: 800; text-transform: uppercase; text-decoration: underline; letter-spacing: 0.5px; color: ${warnaJudul};">${judul}</h3>
+        <p style="font-size: 13px; color: #444; margin-top: 4px;">Peminjaman Ruangan: Dok/GA-RS/${b.id}</p>
+      </div>
+
+      <p style="font-size: 13.5px; line-height: 1.5; margin-bottom: 25px; color: #333;">
+        Pada hari ini, tanggal <b>${fmtDate(b.date)}</b> pukul <b>${baData.time} WIB</b>, telah dilakukan serah terima verifikasi fasilitas inventaris ruangan <b>${b.roomName}</b> oleh penanggung jawab <b>${b.applicantName}</b> dari unit <b>${b.department}</b>.
+      </p>
+
+      <h5 style="font-size: 13px; font-weight: 800; color: var(--acc); text-transform: uppercase; margin-bottom: 8px; border-left: 3px solid var(--acc); padding-left: 8px;">I. Rincian Checklist Fasilitas Logistik</h5>
+      <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px; font-size: 13.5px;">
+        <thead>
+          <tr style="background:#f0f0f0;">
+            <th style="border:1px solid #dcdcdc; padding:8px; text-align:left; width:50%;">Nama Fasilitas / Alat</th>
+            <th style="border:1px solid #dcdcdc; padding:8px; text-align:left; width:50%;">Status Kondisi Akhir</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${checklistHtml}
+        </tbody>
+      </table>
+
+      <h5 style="font-size: 13px; font-weight: 800; color: var(--acc); text-transform: uppercase; margin-bottom: 8px; border-left: 3px solid var(--acc); padding-left: 8px;">II. Catatan / Keterangan</h5>
+      <div style="padding: 15px; border: 1px solid #e0e0e0; background: #f9f9f9; font-style: italic; margin-bottom: 35px; font-size: 13.5px;">
+        "${baData.notes}"
+      </div>
+
+      <div style="margin-top: 40px; display: flex; justify-content: space-between; font-size: 13.5px; padding: 0 10px; font-family: var(--font);">
+        <div style="width: 40%; text-align: center; display: flex; flex-direction: column; align-items: center;">
+          <p style="color: #444; margin: 0 0 10px 0;">Mengonfirmasi Kondisi,<br>User Penanggung Jawab,</p>
+          <div style="height: 75px; display: flex; align-items: center; justify-content: center;">
+            ${baData.signature ? `<img src="${baData.signature}" style="max-height: 70px; max-width: 160px; object-fit: contain;">` : `<div style="color:#ccc; font-size:11px; font-style:italic;">Belum Ditandatangani</div>`}
+          </div>
+          <div style="margin-top: 10px;">
+            <p style="font-weight: 800; text-decoration: underline; color: #141414; margin: 0; padding-bottom: 2px;">${b.applicantName}</p>
+            <p style="font-size: 12px; color: #666; margin: 0;">${b.department}</p>
+          </div>
+        </div>
+
+        <div style="width: 40%; text-align: center; display: flex; flex-direction: column; align-items: center;">
+          <p style="color: #444; margin: 0 0 10px 0;">Mengetahui,<br>Admin General Affairs,</p>
+          <div style="height: 75px; display: flex; align-items: center; justify-content: center;">
+            <img src="ttd_adminga.png" style="max-height: 70px; max-width: 160px; object-fit: contain;" onerror="this.style.display='none';">
+          </div>
+          <div style="margin-top: 10px;">
+            <p style="font-weight: 800; text-decoration: underline; color: #141414; margin: 0; padding-bottom: 2px;">Ramadhanti Dwi Indra</p>
+            <p style="font-size: 12px; color: #666; margin: 0;">Admin General Affair</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  go('print');
+}
+// ----------------------------------------------------------------------
 
 function viewPrint(id) {
   const b = bookings.find(x => x.id === id); if (!b) return;
@@ -2614,7 +2857,6 @@ function saveWhatsAppConfig() {
     .catch(() => alert('Gagal menyimpan ke server.'));
 }
 
-// === TAMBAHKAN FUNGSI BARU INI ===
 async function saveMasterRoomAction() {
   const name = document.getElementById('m-room-name').value.trim();
   const loc = document.getElementById('m-room-loc').value.trim();
@@ -2679,7 +2921,6 @@ async function saveMasterRoomAction() {
     alert('Gagal menyimpan data ruangan ke cloud server database.');
   }
 }
-// =================================
 function renderAdminExport() {
   document.getElementById('t-ex').innerHTML = `
     <div class="fc" style="margin-top:20px;">
@@ -2689,11 +2930,45 @@ function renderAdminExport() {
 }
 function exportDataToCSV() {
   if (!bookings.length) { alert('Tidak ada arsip!'); return; }
-  let csv = "ID Berkas,Nama Ruangan,Tanggal Pelaksanaan,Mulai,Selesai,Agenda Acara,Nama Pemohon,BA Masuk,BA Keluar\n";
-  bookings.forEach(b => { csv += `"${b.id}","${b.roomName}","${b.date}","${b.startTime}","${b.endTime}","${b.eventName}","${b.applicantName}","${b.baCheckIn?b.baCheckIn.time:'-'}","${b.baCheckOut?b.baCheckOut.time:'-'}"\n`; });
+  
+  // Mengambil URL web saat ini agar link form BA dinamis sesuai domain web Anda
+  const baseUrl = window.location.origin + window.location.pathname; 
+
+  // Header Kolom CSV yang lebih lengkap
+  let csv = "ID Berkas,Nama Ruangan,Tanggal Pelaksanaan,Waktu Mulai,Waktu Selesai,Agenda Acara,Kategori Acara,Level Meeting,Nama Pemohon,Unit / Departemen,Email Pemohon,Peserta Terlibat,Layout Meja,Catatan Khusus GA,Waktu BA Masuk,Catatan BA Masuk,Link Form BA Masuk,Waktu BA Keluar,Catatan BA Keluar,Link Form BA Keluar\n";
+  
+  bookings.forEach(b => { 
+    // Fungsi bantuan (helper) untuk mengamankan teks dari koma (,) atau enter (\n) yang bisa merusak format Excel
+    const esc = (text) => {
+      if (text === null || text === undefined) return '""';
+      const str = String(text).replace(/"/g, '""'); // Ganti tanda kutip ganda menjadi kutip ganda ganda (escape CSV)
+      return `"${str}"`;
+    };
+
+    // Ekstrak data BA Masuk
+    const baInTime = b.baCheckIn ? b.baCheckIn.time + ' WIB' : 'Belum';
+    const baInNotes = b.baCheckIn ? b.baCheckIn.notes : '-';
+    // Membuat Link unik yang mengarah ke form cetak BA Masuk
+    const baInLink = b.baCheckIn ? `${baseUrl}?action=printBA&type=in&id=${b.id}` : '-';
+
+    // Ekstrak data BA Keluar
+    const baOutTime = b.baCheckOut ? b.baCheckOut.time + ' WIB' : 'Belum';
+    const baOutNotes = b.baCheckOut ? b.baCheckOut.notes : '-';
+    // Membuat Link unik yang mengarah ke form cetak BA Keluar
+    const baOutLink = b.baCheckOut ? `${baseUrl}?action=printBA&type=out&id=${b.id}` : '-';
+
+    // Susun baris data
+    csv += `${esc(b.id)},${esc(b.roomName)},${esc(b.date)},${esc(b.startTime)},${esc(b.endTime)},${esc(b.eventName)},${esc(b.eventType)},${esc(b.meetingLevel)},${esc(b.applicantName)},${esc(b.department)},${esc(b.email)},${esc(b.eventAttendees)},${esc(b.roomLayout)},${esc(b.gaNotes)},${esc(baInTime)},${esc(baInNotes)},${esc(baInLink)},${esc(baOutTime)},${esc(baOutNotes)},${esc(baOutLink)}\n`; 
+  });
+  
+  // Proses Download
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.setAttribute("download", `Laporan_RuangKita_GA.csv`);
-  document.body.appendChild(link); link.click(); document.body.removeChild(link);
+  const link = document.createElement("a"); 
+  link.href = URL.createObjectURL(blob); 
+  link.setAttribute("download", `Laporan_Lengkap_RuangKita_GA.csv`);
+  document.body.appendChild(link); 
+  link.click(); 
+  document.body.removeChild(link);
 }
 
 function openEditAccountModal() {
@@ -2712,8 +2987,6 @@ function saveAccountUpdates() {
   // Update ke lokal device saat ini
   currentUser.name = n; currentUser.dept = d;
   localStorage.setItem('rb_current_user', JSON.stringify(currentUser));
-  
-  // Note: idealnya fungsi di atas juga menggunakan fbPatch() ke Firebase jika ingin update profile lintas device
   
   closeEditAccountModal(); renderHome(); alert('Profil Diperbarui!');
 }
