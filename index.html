@@ -610,7 +610,8 @@ body {
           <option value="Sekretaris Departement Medik">Sekretaris Departement Medik</option>
           <option value="SDM">SDM</option>
           <option value="Diklat">Diklat</option>
-          <option value="Peneliti">Peneliti</option>
+          <option value="Peneliti CRU">Peneliti CRU</option>
+          <option value="Peneliti KEPK">Peneliti KEPK</option>
           <option value="Finance">Finance</option>
           <option value="Pengadaan">Pengadaan</option>
           <option value="Akuntan & BMN">Akuntan & BMN</option>
@@ -823,12 +824,14 @@ body {
     <button class="tab" onclick="showTab('t-bulletin-maint')">Announcement & Maintenance</button>
     <button class="tab" onclick="showTab('t-wa')">Integrasi WhatsApp</button>
     <button class="tab" onclick="showTab('t-ex')">Ekspor Laporan</button>
+    <button class="tab" onclick="showTab('t-rekap')">Rekap Jadwal GA</button>
   </div>
   <div id="t-bk"></div>
   <div id="t-rm" style="display:none"></div>
   <div id="t-bulletin-maint" style="display:none"></div>
   <div id="t-wa" style="display:none"></div>
   <div id="t-ex" style="display:none"></div>
+  <div id="t-rekap" style="display:none"></div>
 </div>
 
 <div class="modal-bg" id="modal-edit-account">
@@ -850,7 +853,8 @@ body {
           <option value="Sekretaris Departement Medik">Sekretaris Departement Medik</option>
           <option value="SDM">SDM</option>
           <option value="Diklat">Diklat</option>
-          <option value="Peneliti">Peneliti</option>
+          <option value="Peneliti CRU">Peneliti CRU</option>
+          <option value="Peneliti KEPK">Peneliti KEPK</option>
           <option value="Finance">Finance</option>
           <option value="Pengadaan">Pengadaan</option>
           <option value="Akuntan & BMN">Akuntan & BMN</option>
@@ -2601,7 +2605,7 @@ function resetForm() {
 function initAdmin() { showTab('t-bk'); }
 
 function showTab(id) {
-  ['t-bk','t-rm','t-bulletin-maint','t-wa','t-ex'].forEach(t => { 
+  ['t-bk','t-rm','t-bulletin-maint','t-wa','t-ex','t-rekap'].forEach(t => { 
     document.getElementById(t).style.display = t === id ? 'block' : 'none'; 
   });
   
@@ -2614,6 +2618,7 @@ function showTab(id) {
   if (id === 't-bulletin-maint') { btns[2].classList.add('on'); renderAdminBulletinAndMaintenance(); } 
   if (id === 't-wa') { btns[3].classList.add('on'); renderAdminWhatsApp(); }
   if (id === 't-ex') { btns[4].classList.add('on'); renderAdminExport(); }
+  if (id === 't-rekap') { btns[5].classList.add('on'); renderAdminRecap(); }
 }
 
 function renderAdminBulletinAndMaintenance() {
@@ -3116,6 +3121,159 @@ async function deleteMasterRoom(id) {
       alert('Gagal menghapus ruangan.');
     }
   }
+}
+// ==========================================
+// FITUR REKAP JADWAL GA (HARIAN/MINGGUAN/BULANAN)
+// ==========================================
+let currentRecapView = 'week';
+let recapRefDate = todayStr();
+
+function renderAdminRecap() {
+  document.getElementById('t-rekap').innerHTML = `
+    <div class="fc" style="margin-top:20px;">
+      <div class="fc-title"><i class="ti ti-calendar-stats"></i> Rekapitulasi Operasional Tim Lapangan GA</div>
+      <p style="font-size: 13px; color: var(--muted); margin-bottom: 15px;">
+        Filter jadwal berdasarkan periode, lalu klik salin untuk mengirim format rangkuman tugas ke grup WA logistik.
+      </p>
+      
+      <div class="filter-bar" style="margin-bottom: 20px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+        <input type="date" id="rekap-date" value="${recapRefDate}" onchange="updateRecapDate()" style="max-width: 160px; height: 42px;">
+        <div class="role-selector" style="margin-bottom: 0; flex: 1; min-width: 250px; display: flex;">
+          <button class="role-btn ${currentRecapView === 'day' ? 'active' : ''}" onclick="setRecapView('day')">Harian</button>
+          <button class="role-btn ${currentRecapView === 'week' ? 'active' : ''}" onclick="setRecapView('week')">Mingguan</button>
+          <button class="role-btn ${currentRecapView === 'month' ? 'active' : ''}" onclick="setRecapView('month')">Bulanan</button>
+        </div>
+        <button class="btn-wa" onclick="copyRecapToWA()" style="height: 42px;">
+          <i class="ti ti-copy"></i> Salin Rangkuman (Format WA)
+        </button>
+      </div>
+
+      <div id="rekap-content" style="background: #1f1f1f; padding: 18px; border-radius: var(--r); border: 1px solid var(--bdr2); max-height: 500px; overflow-y: auto;">
+      </div>
+    </div>
+  `;
+  generateRecapContent();
+}
+
+function updateRecapDate() {
+  recapRefDate = document.getElementById('rekap-date').value;
+  generateRecapContent();
+}
+
+function setRecapView(view) {
+  currentRecapView = view;
+  renderAdminRecap(); 
+}
+
+function getStartOfWeek(dStr) {
+  const d = new Date(dStr + 'T00:00:00');
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+  const start = new Date(d.setDate(diff));
+  return start.toISOString().split('T')[0];
+}
+
+function generateRecapContent() {
+  const contentDiv = document.getElementById('rekap-content');
+  if (!contentDiv) return;
+
+  let startDate, endDate, titleText;
+  const ref = new Date(recapRefDate + 'T00:00:00');
+
+ if (currentRecapView === 'day') {
+    startDate = recapRefDate; endDate = recapRefDate;
+    titleText = `Rekap Operasional Harian: ${fmtDate(recapRefDate)}`;
+  } else if (currentRecapView === 'week') {
+    startDate = getStartOfWeek(recapRefDate); endDate = addDays(startDate, 6);
+    
+    // LOGIKA BARU: Menghitung "Minggu Ke-Berapa" dalam bulan tersebut
+    const dStart = new Date(startDate + 'T00:00:00');
+    const weekNum = Math.ceil(dStart.getDate() / 7);
+    const monthNames = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+    
+    // Judul menjadi absolut (Misal: Minggu Ke-3 Bulan Juli 2026)
+    titleText = `Rekap Operasional: Minggu Ke-${weekNum} Bulan ${monthNames[dStart.getMonth()]} ${dStart.getFullYear()}`;
+    
+  } else if (currentRecapView === 'month') {
+    startDate = `${ref.getFullYear()}-${String(ref.getMonth() + 1).padStart(2, '0')}-01`;
+    const lastDay = new Date(ref.getFullYear(), ref.getMonth() + 1, 0).getDate();
+    endDate = `${ref.getFullYear()}-${String(ref.getMonth() + 1).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+    const monthNames = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+    titleText = `Rekap Operasional Bulanan: ${monthNames[ref.getMonth()]} ${ref.getFullYear()}`;
+  }
+
+  const filtered = bookings.filter(b => b.date >= startDate && b.date <= endDate).sort((a, b) => {
+    return (a.date + a.startTime) > (b.date + b.startTime) ? 1 : -1;
+  });
+
+  let html = `<h4 style="color: var(--acc); margin-bottom: 15px; text-transform: uppercase; font-weight: 800; border-bottom: 1px dashed var(--bdr2); padding-bottom: 10px;">📋 ${titleText}</h4>`;
+  
+  if (filtered.length === 0) {
+    html += `<div style="text-align: center; color: var(--muted); padding: 30px;">Tidak ada jadwal ruangan yang terdaftar pada periode ini.</div>`;
+  } else {
+    let lastDate = '';
+    filtered.forEach(b => {
+      if (b.date !== lastDate) {
+        html += `<div style="background: var(--accl); color: var(--acc); padding: 6px 12px; font-weight: 700; margin: 18px 0 12px 0; border-radius: 4px; display:inline-block;">📅 ${fmtDate(b.date)}</div>`;
+        lastDate = b.date;
+      }
+      html += `
+        <div style="margin-bottom: 12px; padding: 14px; background: #262626; border-left: 3px solid var(--ok); border-radius: 4px; font-size: 13px; line-height: 1.6;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+            <b style="font-size: 14.5px; color: #fff;">${b.eventName}</b>
+            <span style="color: var(--ok); font-weight: 800; background: rgba(70, 211, 105, 0.15); padding: 2px 8px; border-radius: 4px;">⏰ ${b.startTime} - ${b.endTime} WIB</span>
+          </div>
+          <div style="display: grid; grid-template-columns: 110px 1fr; gap: 4px; color: #ccc;">
+            <span>📍 Ruangan</span> <span>: <b style="color: #fff;">${b.roomName}</b></span>
+            <span>👤 PIC</span> <span>: ${b.applicantName} (${b.department})</span>
+            <span>👥 Peserta</span> <span>: ${b.eventAttendees || '-'}</span>
+            <span>🪑 Layout</span> <span>: <b style="color: #fff;">${b.roomLayout || '-'}</b></span>
+            <span>📝 Notes GA</span> <span>: <i style="color: var(--warn); font-weight: 600;">${b.gaNotes || '-'}</i></span>
+          </div>
+        </div>
+      `;
+    });
+  }
+  
+  contentDiv.innerHTML = html;
+  contentDiv.dataset.raw = JSON.stringify({titleText, events: filtered});
+}
+
+function copyRecapToWA() {
+  const contentDiv = document.getElementById('rekap-content');
+  if (!contentDiv || !contentDiv.dataset.raw) return;
+  
+  const data = JSON.parse(contentDiv.dataset.raw);
+  if (data.events.length === 0) {
+    alert("Maaf, tidak ada jadwal untuk disalin pada rentang tanggal ini.");
+    return;
+  }
+
+  let text = `*${data.titleText}*\n==========================\n\n`;
+  let lastDate = '';
+  
+  data.events.forEach(b => {
+    if (b.date !== lastDate) {
+      text += `*📅 ${fmtDate(b.date)}*\n\n`;
+      lastDate = b.date;
+    }
+    text += `🔹 *${b.eventName}*\n`;
+    text += `⏰ Waktu: ${b.startTime} - ${b.endTime} WIB\n`;
+    text += `📍 Ruangan: ${b.roomName}\n`;
+    text += `👤 PIC: ${b.applicantName} (${b.department})\n`;
+    text += `👥 Peserta: ${b.eventAttendees || '-'}\n`;
+    text += `🪑 Layout: ${b.roomLayout || '-'}\n`;
+    text += `📝 Notes GA: _${b.gaNotes || '-' }_\n`;
+    text += `--------------------------\n`;
+  });
+
+  text += `\n_Di-generate otomatis oleh Sistem RuangKita_`;
+
+  navigator.clipboard.writeText(text).then(() => {
+    alert('✅ Format rekap WA berhasil disalin ke Clipboard!\n\nSilakan buka grup WhatsApp tim logistik GA Anda, lalu klik kanan > Paste (Tempel) atau tekan CTRL+V.');
+  }).catch(err => {
+    alert('Gagal menyalin format: ', err);
+  });
 }
 </script>
 </body>
