@@ -1725,7 +1725,13 @@ function renderUpcoming() {
     return `<div class="ucard">
       <div class="ucard-date">${b.date === today ? 'Hari ini' : fmtDate(b.date)}</div>
       <div class="ucard-event">${b.eventName}</div>
-      <div class="ucard-room">🏢 ${b.roomName}</div>
+      <div class="ucard-room" style="margin-bottom: 6px;">🏢 ${b.roomName}</div>
+      
+      <!-- TAMBAHAN BARU: Nama Pemohon & Departemen -->
+      <div style="font-size: 12px; color: #aaaaaa; margin-bottom: 12px; display: flex; align-items: center; gap: 5px;">
+        <i class="ti ti-user-circle"></i> ${b.applicantName} (${b.department})
+      </div>
+      
       <div class="tag-row">
         <span class="tag"><i class="ti ti-clock"></i> ${b.startTime}–${b.endTime}</span>
         <span class="tag ${currentStatus==='On Going'?'warn':'ok'}">${currentStatus}</span>
@@ -1746,7 +1752,13 @@ function renderMonthly() {
     <div class="ucard">
       <div class="ucard-date">${fmtDate(b.date)}</div>
       <div class="ucard-event">${b.eventName}</div>
-      <div class="ucard-room">🏢 ${b.roomName}</div>
+      <div class="ucard-room" style="margin-bottom: 6px;">🏢 ${b.roomName}</div>
+      
+      <!-- TAMBAHAN BARU: Nama Pemohon & Departemen -->
+      <div style="font-size: 12px; color: #aaaaaa; margin-bottom: 12px; display: flex; align-items: center; gap: 5px;">
+        <i class="ti ti-user-circle"></i> ${b.applicantName} (${b.department})
+      </div>
+
       <div class="tag-row">
         <span class="tag"><i class="ti ti-clock"></i> ${b.startTime}–${b.endTime}</span>
         <span class="tag ok">Scheduled</span>
