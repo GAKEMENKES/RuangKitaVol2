@@ -1152,11 +1152,27 @@ async function fetchUsersFromCloud() {
 
 async function fetchBookingsFromCloud() {
   try {
-    const data = await fbGet('bookings');
-    if (data) {
-      bookings = Object.entries(data).map(([key, val]) => ({ ...val, _fbKey: key }));
-    } else {
-      bookings = [];
+    try {
+      const data = await fbGet('bookings');
+      if (data) {
+        bookings = Object.entries(data)
+          .filter(([key, val]) => val !== null) 
+          .map(([key, val]) => ({ 
+              ...val, 
+              _fbKey: key,
+              eventName: val.eventName || 'Agenda Tanpa Nama',
+              applicantName: val.applicantName || 'User Unknown',
+              date: val.date || '2025-01-01',
+              startTime: val.startTime || '00:00',
+              endTime: val.endTime || '00:00',
+              roomName: val.roomName || 'Ruangan Unknown',
+              department: val.department || '-'
+          }));
+      } else {
+        bookings = [];
+      }
+    } catch(err) {
+      bookings = []; 
     }
 
     try {
@@ -1173,36 +1189,48 @@ async function fetchBookingsFromCloud() {
       const customRoomsData = await fbGet('rooms_data');
       
       if (customRoomsData) {
-        const fbRooms = Object.values(customRoomsData);
+        const fbRooms = Object.values(customRoomsData).filter(r => r !== null);
         
-        // 1. Gabungkan ruangan bawaan (DEFAULT) dengan data dari Firebase
-        // Jika ruangan bawaan diedit di Admin, data dari Firebase akan diutamakan
         rooms = DEFAULT_ROOMS.map(defaultRoom => {
             const updatedRoom = fbRooms.find(fbRoom => fbRoom.id === defaultRoom.id);
             return updatedRoom ? updatedRoom : defaultRoom;
         });
 
-        // 2. Tambahkan ruangan baru yang dibuat murni dari Panel Admin
         const newRooms = fbRooms.filter(fbRoom => !DEFAULT_ROOMS.find(defaultRoom => defaultRoom.id === fbRoom.id));
         rooms = [...rooms, ...newRooms];
         
-        // 3. Terapkan status Maintenance jika ada
         if (cloudRooms) {
           rooms.forEach(r => {
             if (cloudRooms[r.id] !== undefined) r.isMaintenance = cloudRooms[r.id];
           });
         }
       } else {
-        // Jika belum ada data di Firebase sama sekali, pakai data bawaan
         rooms = [...DEFAULT_ROOMS];
       }
     } catch(e) {
-      console.log('Gagal memuat foto ruangan kustom dari cloud:', e);
+      rooms = [...DEFAULT_ROOMS];
     }
 
-    await fetchUsersFromCloud();
-    checkAndSendBAReminders();
+    try {
+      const cloudSchedRooms = await fbGet('rooms_scheduled_maintenance');
+      rooms.forEach(r => {
+        r.scheduledMaintenance = (cloudSchedRooms && cloudSchedRooms[r.id]) ? cloudSchedRooms[r.id] : [];
+      });
+    } catch(e) {
+      rooms.forEach(r => r.scheduledMaintenance = []);
+    }
 
+    try {
+      const savedWa = await fbGet('config/waNum');
+      if (savedWa) waNum = savedWa;
+    } catch(e) {}
+
+    try { await fetchUsersFromCloud(); } catch(e){}
+    try { await checkAndSendBAReminders(); } catch(e){}
+
+  } catch (error) {
+    console.error("Gagal sinkronisasi Firebase:", error);
+  } finally {
     if (document.getElementById('page-home').classList.contains('on')) renderHome();
     else if (document.getElementById('page-bookings').classList.contains('on')) renderBookings();
     else if (document.getElementById('page-admin').classList.contains('on')) {
@@ -1214,22 +1242,17 @@ async function fetchBookingsFromCloud() {
         else if (activeOnClick.includes('t-bulletin-maint')) renderAdminBulletinAndMaintenance();
         else if (activeOnClick.includes('t-wa')) renderAdminWhatsApp();
         else if (activeOnClick.includes('t-ex')) renderAdminExport();
+        else if (activeOnClick.includes('t-rekap')) renderAdminRecap();
       }
     }
 
-    // --- TAMBAHAN BARU: Menangkap klik link dari File Excel ---
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('action') === 'printBA') {
-       // Otomatis membuka halaman Cetak Berita Acara sesuai ID dan Type dari URL Excel
-       viewPrintBA(urlParams.get('id'), urlParams.get('type'));
-       
-       // Membersihkan URL baris atas agar rapi kembali
-       window.history.replaceState({}, document.title, window.location.pathname);
-    }
-    // ----------------------------------------------------------
-
-  } catch (error) {
-    console.error("Gagal sinkronisasi Firebase:", error);
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('action') === 'printBA') {
+         viewPrintBA(urlParams.get('id'), urlParams.get('type'));
+         window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    } catch(e){}
   }
 }
 setInterval(() => { if (currentUser) fetchBookingsFromCloud(); }, 30000);
@@ -1661,8 +1684,11 @@ function renderToday() {
 }
 
 function getBAButtonHtml(b) {
+  if (!currentUser) return '';
   if (currentUser.name !== b.applicantName && currentUser.role !== 'admin') return '';
   const today = todayStr();
+  
+  if (!b.startTime || !b.endTime) return '';
   
   if (b.date < today && b.baCheckIn && !b.baCheckOut) {
     return `<div style="background:rgba(225,9,20,0.1); border:1px solid var(--acc); padding:8px 12px; border-radius:4px; margin-top:5px;">
@@ -1720,7 +1746,7 @@ function getBAButtonHtml(b) {
   }
 
   return `<span style="font-size:11px; color:var(--ok); font-weight:700;">
-            <i class="ti ti-checkbox"></i> Berita Acah Masuk & Keluar Lengkap (Verified)
+            <i class="ti ti-checkbox"></i> Berita Acara Masuk & Keluar Lengkap (Verified)
           </span>`;
 }
 
@@ -1733,6 +1759,8 @@ async function checkAndSendBAReminders() {
   for (const b of bookings) {
     if (b.date !== todayNow) continue;
     if (!b.email) continue;
+    
+    if (!b.startTime || !b.endTime) continue; 
 
     const [startH, startM] = b.startTime.split(':').map(Number);
     const [endH, endM] = b.endTime.split(':').map(Number);
@@ -1745,7 +1773,7 @@ async function checkAndSendBAReminders() {
         sendSystemEmail(
           b.email,
           `[Pengingat] Saatnya Isi BA Masuk - ${b.eventName}`,
-          `Halo ${b.applicantName},\n\nAgenda "${b.eventName}" di ruangan ${b.roomName} akan segera dimulai pukul ${b.startTime} WIB.\n\nMohon segera login ke sistem RuangKita dan isi Berita Acara Masuk sebelum rapat dimulai, agar kelayakan fasilitas ruangan dapat terverifikasi.\n\nTerima kasih.\n\nSalam,\nGA RS Kemenkes Surabaya`
+          `Halo ${b.applicantName},\n\nAgenda "${b.eventName}" di ruangan ${b.roomName} akan segera dimulai pukul ${b.startTime} WIB.\n\nMohon segera login ke sistem RuangKita dan isi Berita Acara Masuk sebelum rapat dimulai.\n\nTerima kasih.\n\nSalam,\nGA RS Kemenkes Surabaya`
         );
         b.baInReminderSent = true;
         if (b._fbKey) fbPatch(`bookings/${b._fbKey}`, { baInReminderSent: true }).catch(()=>{});
@@ -1757,7 +1785,7 @@ async function checkAndSendBAReminders() {
         sendSystemEmail(
           b.email,
           `[Pengingat] Saatnya Isi BA Keluar - ${b.eventName}`,
-          `Halo ${b.applicantName},\n\nAgenda "${b.eventName}" di ruangan ${b.roomName} sudah selesai pukul ${b.endTime} WIB.\n\nMohon segera login ke sistem RuangKita dan isi Berita Acara Keluar (check-out) agar ruangan dapat dikembalikan dan diverifikasi oleh Tim GA.\n\nTerima kasih.\n\nSalam,\nGA RS Kemenkes Surabaya`
+          `Halo ${b.applicantName},\n\nAgenda "${b.eventName}" di ruangan ${b.roomName} sudah selesai pukul ${b.endTime} WIB.\n\nMohon segera login ke sistem RuangKita dan isi Berita Acara Keluar (check-out).\n\nTerima kasih.\n\nSalam,\nGA RS Kemenkes Surabaya`
         );
         b.baOutReminderSent = true;
         if (b._fbKey) fbPatch(`bookings/${b._fbKey}`, { baOutReminderSent: true }).catch(()=>{});
@@ -1765,7 +1793,6 @@ async function checkAndSendBAReminders() {
     }
   }
 }
-
 function renderUpcoming() {
   const today = todayStr(), now = new Date(), ns = now.toTimeString().slice(0,5);
   const todayFut = bookings.filter(b => b.date===today && b.startTime > ns);
@@ -1976,9 +2003,10 @@ function renderBookings() {
   const today = todayStr();
 
   // PENGAMANAN BARU: Mencegah sistem crash jika ada data Firebase yang kosong/undefined
+  // PENGAMANAN BARU: Ubah ke format String aman agar tidak crash
   let fil = bookings.filter(b => 
-      (b.eventName && b.eventName.toLowerCase().includes(q)) || 
-      (b.applicantName && b.applicantName.toLowerCase().includes(q))
+      (b.eventName && String(b.eventName).toLowerCase().includes(q)) || 
+      (b.applicantName && String(b.applicantName).toLowerCase().includes(q))
   );
   
   if (dateQ) fil = fil.filter(b => b.date === dateQ);
