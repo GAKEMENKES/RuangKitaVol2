@@ -2323,6 +2323,7 @@ if (targetRoomMaintenance && targetRoomMaintenance.scheduledMaintenance) {
   
   const eventType = document.getElementById('f-type').value;
   const eventAttendees = document.getElementById('f-notes').value.trim() || '-';
+  const participantCount = document.getElementById('f-att').value || '0'; // <--- TAMBAHAN BARU
   const roomLayout = document.getElementById('f-layout').value;
   const gaNotesInput = document.getElementById('f-ganotes').value.trim() || '-';
   
@@ -2333,6 +2334,7 @@ if (targetRoomMaintenance && targetRoomMaintenance.scheduledMaintenance) {
     baCheckIn: null, baCheckOut: null,
     eventType: eventType,
     eventAttendees: eventAttendees,
+    participantCount: participantCount, // <--- TAMBAHAN BARU DISIMPAN KE FIREBASE
     roomLayout: roomLayout,
     gaNotes: gaNotesInput
   };
@@ -3401,7 +3403,8 @@ function generateRecapContent() {
           <div style="display: grid; grid-template-columns: 110px 1fr; gap: 4px; color: #ccc;">
             <span>📍 Ruangan</span> <span>: <b style="color: #fff;">${b.roomName}</b></span>
             <span>👤 PIC</span> <span>: ${b.applicantName} (${b.department})</span>
-            <span>👥 Peserta</span> <span>: ${b.eventAttendees || '-'}</span>
+            <span>👥 Jumlah Peserta</span> <span>: <b style="color: #fff;">${b.participantCount || '-'} Orang</b></span>
+<span>📋 Detail Peserta</span> <span>: ${b.eventAttendees || '-'}</span>
             <span>🪑 Layout</span> <span>: <b style="color: #fff;">${b.roomLayout || '-'}</b></span>
             <span>📝 Notes GA</span> <span>: <i style="color: var(--warn); font-weight: 600;">${b.gaNotes || '-'}</i></span>
           </div>
@@ -3436,7 +3439,8 @@ function copyRecapToWA() {
     text += `⏰ Waktu: ${b.startTime} - ${b.endTime} WIB\n`;
     text += `📍 Ruangan: ${b.roomName}\n`;
     text += `👤 PIC: ${b.applicantName} (${b.department})\n`;
-    text += `👥 Peserta: ${b.eventAttendees || '-'}\n`;
+    text += `👥 Jml Peserta: ${b.participantCount || '-'} Orang\n`;
+    text += `📋 Detail Peserta: ${b.eventAttendees || '-'}\n`;
     text += `🪑 Layout: ${b.roomLayout || '-'}\n`;
     text += `📝 Notes GA: _${b.gaNotes || '-' }_\n`;
     text += `--------------------------\n`;
