@@ -551,6 +551,8 @@ body {
   color: #ddd;
 }
 </style>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 </head>
 <body>
 
@@ -709,8 +711,14 @@ body {
 
 <div class="page" id="page-bookings">
   <div class="sh">
-    <div class="st">Semua Jadwal Rencana Booking</div>
-    <button class="btn-pri" onclick="go('book')"><i class="ti ti-plus"></i>Buat Pengajuan</button>
+    <div class="st" id="page-bookings-title">Semua Jadwal Rencana Booking</div>
+    <div style="display: flex; gap: 10px;">
+      <!-- Tombol Baru Ditambahkan Disini -->
+      <button type="button" class="btn-sec" id="btn-filter-my-bookings" onclick="toggleMyBookings()">
+        <i class="ti ti-user"></i> Agenda Saya
+      </button>
+      <button class="btn-pri" onclick="go('book')"><i class="ti ti-plus"></i>Buat Pengajuan</button>
+    </div>
   </div>
   <div class="filter-bar" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
     <input type="text" id="bsrch" placeholder="Cari berdasarkan nama acara atau pemohon..." oninput="renderBookings()">
@@ -1056,49 +1064,83 @@ const DEFAULT_ROOMS = [
   {id:'r9',name:'Lounge C',floor:1,capacity:30,color:'#E50914',image:'lounge_c.png',location:'Gedung C, Lantai 1 Lobby',facilities:['Tv 75 inch','Kursi','Meja','Speaker JBL Ultimate','Microphone JBL'],description:'Ruang meeting eksklusif.'}
 ];
 
+// --- 1. INISIALISASI FIREBASE AUTH ---
+const firebaseConfig = {
+  // Ganti nilai di bawah ini dengan milik Anda dari Firebase Console > Project Settings
+  apiKey: "AIzaSyAbLxus9T3wt5NN_EniG__p118cLjz2jvA",
+  authDomain: "ruangkita-4699a.firebaseapp.com",
+  databaseURL: "https://ruangkita-4699a-default-rtdb.firebaseio.com",
+  projectId: "ruangkita-4699a",
+  storageBucket: "ruangkita-4699a.firebasestorage.app",
+  messagingSenderId: "130495806349",
+  appId: "1:130495806349:web:383ed2ba5167b9b99fdbc4",
+  measurementId: "G-0RKH7NE73S"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+
 const FIREBASE_URL = "https://ruangkita-4699a-default-rtdb.firebaseio.com/";
 
 let rooms = JSON.parse(localStorage.getItem('rb_rooms') || 'null') || DEFAULT_ROOMS;
 let bookings = [];
 let bulletins = [];
 let waNum = '';
-let users = [
-  { email: 'bagusssrya@gmail.com', pass: 'pancasewandani', name: 'Bagus Surya', dept: 'General Affairs', role: 'admin' },
-  { email: 'admin', pass: 'admin123', name: 'Admin Utama GA', dept: 'General Affairs', role: 'admin' },
-  { email: 'rosa', pass: 'rosa123', name: 'Rosa', dept: 'Marketing', role: 'user' }
-]; 
+let users = []; // Dikosongkan karena password dikelola langsung oleh Firebase Auth
 let currentUser = JSON.parse(localStorage.getItem('rb_current_user')) || null;
 let currentLoginRole = 'user';
 
-// Variabel Global Kanvas BA
 let baCanvas, baCtx, baIsDrawing = false, baHasDrawn = false;
 
+// --- 2. FUNGSI PENGAMBILAN KARTU ID (TOKEN) ---
+async function getAuthToken() {
+  return new Promise((resolve) => {
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      unsubscribe();
+      if (user) {
+        const token = await user.getIdToken();
+        resolve(token);
+      } else {
+        resolve('');
+      }
+    });
+  });
+}
+
+function buildUrl(path, token) {
+  return `${FIREBASE_URL}${path}.json${token ? '?auth=' + token : ''}`;
+}
+
+// --- 3. FUNGSI FETCH DENGAN TOKEN KEAMANAN ---
 async function fbGet(path) {
-  const res = await fetch(`${FIREBASE_URL}${path}.json`); 
+  const token = await getAuthToken();
+  const res = await fetch(buildUrl(path, token)); 
   if (!res.ok) throw new Error('Firebase GET gagal: ' + res.status);
   return await res.json();
 }
 async function fbPost(path, data) {
-  const res = await fetch(`${FIREBASE_URL}${path}.json`, {
+  const token = await getAuthToken();
+  const res = await fetch(buildUrl(path, token), {
     method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data)
   });
   if (!res.ok) throw new Error('Firebase POST gagal: ' + res.status);
   return await res.json();
 }
 async function fbDelete(path) {
-  await fetch(`${FIREBASE_URL}${path}.json`, { method: 'DELETE' });
+  const token = await getAuthToken();
+  await fetch(buildUrl(path, token), { method: 'DELETE' });
 }
 async function fbPatch(path, data) {
-  await fetch(`${FIREBASE_URL}${path}.json`, {
+  const token = await getAuthToken();
+  await fetch(buildUrl(path, token), {
     method: 'PATCH', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data)
   });
 }
 async function fbPut(path, data) {
-  await fetch(`${FIREBASE_URL}${path}.json`, {
+  const token = await getAuthToken();
+  await fetch(buildUrl(path, token), {
     method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data)
   });
 }
-
 async function fetchUsersFromCloud() {
     try {
         const data = await fbGet('users');
@@ -1127,38 +1169,32 @@ async function fetchBookingsFromCloud() {
     } catch(e) { bulletins = []; }
 
     try {
-      const cloudRooms = await fbGet('rooms_maintenance');
-      if (cloudRooms) {
-        rooms.forEach(r => {
-          if (cloudRooms[r.id] !== undefined) r.isMaintenance = cloudRooms[r.id];
-        });
-      }
-    } catch(e) {}
-
-    try {
-      const cloudSchedRooms = await fbGet('rooms_scheduled_maintenance');
-      rooms.forEach(r => {
-        r.scheduledMaintenance = (cloudSchedRooms && cloudSchedRooms[r.id]) ? cloudSchedRooms[r.id] : [];
-      });
-    } catch(e) {
-      rooms.forEach(r => r.scheduledMaintenance = []);
-    }
-
-    try {
-      const savedWa = await fbGet('config/waNum');
-      if (savedWa) waNum = savedWa;
-    } catch(e) {}
-
-try {
       const cloudRooms = await fbGet('rooms_maintenance'); 
       const customRoomsData = await fbGet('rooms_data');
+      
       if (customRoomsData) {
-        rooms = Object.values(customRoomsData); 
+        const fbRooms = Object.values(customRoomsData);
+        
+        // 1. Gabungkan ruangan bawaan (DEFAULT) dengan data dari Firebase
+        // Jika ruangan bawaan diedit di Admin, data dari Firebase akan diutamakan
+        rooms = DEFAULT_ROOMS.map(defaultRoom => {
+            const updatedRoom = fbRooms.find(fbRoom => fbRoom.id === defaultRoom.id);
+            return updatedRoom ? updatedRoom : defaultRoom;
+        });
+
+        // 2. Tambahkan ruangan baru yang dibuat murni dari Panel Admin
+        const newRooms = fbRooms.filter(fbRoom => !DEFAULT_ROOMS.find(defaultRoom => defaultRoom.id === fbRoom.id));
+        rooms = [...rooms, ...newRooms];
+        
+        // 3. Terapkan status Maintenance jika ada
         if (cloudRooms) {
           rooms.forEach(r => {
             if (cloudRooms[r.id] !== undefined) r.isMaintenance = cloudRooms[r.id];
           });
         }
+      } else {
+        // Jika belum ada data di Firebase sama sekali, pakai data bawaan
+        rooms = [...DEFAULT_ROOMS];
       }
     } catch(e) {
       console.log('Gagal memuat foto ruangan kustom dari cloud:', e);
@@ -1390,16 +1426,22 @@ async function handleRegister() {
     return;
   }
 
-  alertBox.innerHTML = `<div class="al al-warn" style="margin:0 0 15px 0">Memproses Pendaftaran...</div>`;
+  alertBox.innerHTML = `<div class="al al-warn" style="margin:0 0 15px 0">Memproses Enkripsi Akun...</div>`;
   
-  const newUser = { email, pass, name, dept, role: 'user' };
   try {
-      await fbPost('users', newUser);
-      users.push(newUser);
-      alertBox.innerHTML = `<div class="al al-ok" style="margin:0 0 15px 0">Registrasi Berhasil! Data sudah tersimpan di Server.</div>`;
-      setTimeout(() => switchAuthMode('login'), 1500);
+    const userCredential = await auth.createUserWithEmailAndPassword(email, pass);
+    const user = userCredential.user;
+
+    const newUser = { email, name, dept, role: 'user', uid: user.uid };
+    await fbPut(`users/${user.uid}`, newUser); 
+
+    alertBox.innerHTML = `<div class="al al-ok" style="margin:0 0 15px 0">Registrasi Berhasil! Sistem sudah diamankan.</div>`;
+    setTimeout(() => switchAuthMode('login'), 1500);
   } catch(e) {
-      alertBox.innerHTML = `<div class="al al-err" style="margin:0 0 15px 0">Gagal mendaftar, terjadi kesalahan jaringan.</div>`;
+    let msg = "Terjadi kesalahan jaringan.";
+    if (e.code === 'auth/email-already-in-use') msg = "Email ini sudah terdaftar!";
+    if (e.code === 'auth/weak-password') msg = "Kata sandi minimal 6 karakter!";
+    alertBox.innerHTML = `<div class="al al-err" style="margin:0 0 15px 0">${msg}</div>`;
   }
 }
 
@@ -1408,24 +1450,34 @@ async function handleLogin() {
   const pass = document.getElementById('log-pass').value;
   const alertBox = document.getElementById('login-alert');
 
-  alertBox.innerHTML = `<div class="al al-warn" style="margin:0 0 15px 0">Memverifikasi Identitas...</div>`;
+  alertBox.innerHTML = `<div class="al al-warn" style="margin:0 0 15px 0">Memverifikasi ke Server Keamanan...</div>`;
   
-  await fetchUsersFromCloud();
+  try {
+    const userCredential = await auth.signInWithEmailAndPassword(email, pass);
+    const user = userCredential.user;
 
-  const user = users.find(u => u.email === email && u.pass === pass);
-  if (!user) {
+    const userProfile = await fbGet(`users/${user.uid}`);
+    
+    if (!userProfile) {
+      alertBox.innerHTML = `<div class="al al-err" style="margin:0 0 15px 0">Profil data tidak ditemukan di sistem.</div>`;
+      await auth.signOut();
+      return;
+    }
+
+    if (userProfile.role !== currentLoginRole) {
+      alertBox.innerHTML = `<div class="al al-warn" style="margin:0 0 15px 0">Akses Ditolak: Peran akun tidak sesuai opsi terpilih.</div>`;
+      await auth.signOut();
+      return;
+    }
+
+    alertBox.innerHTML = `<div class="al al-ok" style="margin:0 0 15px 0">Berhasil Masuk! Mengalihkan...</div>`;
+    currentUser = userProfile;
+    localStorage.setItem('rb_current_user', JSON.stringify(currentUser)); 
+    setTimeout(() => checkSession(), 800);
+
+  } catch(e) {
     alertBox.innerHTML = `<div class="al al-err" style="margin:0 0 15px 0">Email atau kata sandi Anda keliru!</div>`;
-    return;
   }
-  if (user.role !== currentLoginRole) {
-    alertBox.innerHTML = `<div class="al al-warn" style="margin:0 0 15px 0">Akses Ditolak: Peran akun tidak sesuai opsi terpilih.</div>`;
-    return;
-  }
-
-  alertBox.innerHTML = `<div class="al al-ok" style="margin:0 0 15px 0">Berhasil Masuk! Mengalihkan...</div>`;
-  currentUser = user;
-  localStorage.setItem('rb_current_user', JSON.stringify(currentUser)); 
-  setTimeout(() => checkSession(), 800);
 }
 
 function checkSession() {
@@ -1451,11 +1503,12 @@ function checkSession() {
 }
 
 function handleLogout() {
-  currentUser = null;
-  localStorage.removeItem('rb_current_user');
-  checkSession();
+  auth.signOut().then(() => {
+    currentUser = null;
+    localStorage.removeItem('rb_current_user');
+    checkSession();
+  });
 }
-
 function todayStr() { return new Date().toISOString().split('T')[0]; }
 function addDays(d, n) { const x = new Date(d + 'T00:00:00'); x.setDate(x.getDate() + n); return x.toISOString().split('T')[0]; }
 function fmtDate(d) {
@@ -1869,6 +1922,43 @@ function renderRooms() {
   }).join('');
 }
 
+// Variabel untuk melacak status filter 'Agenda Saya'
+// Taruh variabel ini di luar fungsi agar terbaca oleh semua sistem
+let isMyBookingsOnly = false;
+
+function toggleMyBookings() {
+  isMyBookingsOnly = !isMyBookingsOnly;
+  const btn = document.getElementById('btn-filter-my-bookings');
+  const title = document.getElementById('page-bookings-title');
+  
+  if (isMyBookingsOnly) {
+    btn.style.background = 'var(--acc)';
+    btn.style.borderColor = 'var(--acc)';
+    btn.style.color = '#fff';
+    title.innerHTML = 'Jadwal Rencana Booking Saya';
+  } else {
+    btn.style.background = 'transparent';
+    btn.style.borderColor = 'var(--bdr2)';
+    btn.style.color = '#fff';
+    title.innerHTML = 'Semua Jadwal Rencana Booking';
+  }
+  renderBookings();
+}
+
+function clearAllFilters() {
+  if (document.getElementById('bsrch')) document.getElementById('bsrch').value = '';
+  if (document.getElementById('bdate-search')) document.getElementById('bdate-search').value = '';
+  if (document.getElementById('bsort')) document.getElementById('bsort').value = 'asc';
+  const fRoomEl = document.getElementById('bfroom');
+  if (fRoomEl) fRoomEl.value = ''; 
+  
+  if (isMyBookingsOnly) {
+    toggleMyBookings(); 
+    return; 
+  }
+  renderBookings();
+}
+
 function renderBookings() {
   const fRoomEl = document.getElementById('bfroom');
   if (fRoomEl && fRoomEl.options.length <= 1) {
@@ -1882,16 +1972,21 @@ function renderBookings() {
   const list = document.getElementById('blist'); if (!list) return;
   const today = todayStr();
 
-  let fil = bookings.filter(b => b.eventName.toLowerCase().includes(q) || b.applicantName.toLowerCase().includes(q));
+  // PENGAMANAN BARU: Mencegah sistem crash jika ada data Firebase yang kosong/undefined
+  let fil = bookings.filter(b => 
+      (b.eventName && b.eventName.toLowerCase().includes(q)) || 
+      (b.applicantName && b.applicantName.toLowerCase().includes(q))
+  );
   
-  if (dateQ) {
-    fil = fil.filter(b => b.date === dateQ);
+  if (dateQ) fil = fil.filter(b => b.date === dateQ);
+  if (roomFilter) fil = fil.filter(b => b.roomName === roomFilter);
+
+  // Filter khusus untuk tombol "Booking Saya"
+  if (isMyBookingsOnly && currentUser) {
+    fil = fil.filter(b => b.applicantName === currentUser.name);
   }
 
-  if (roomFilter) {
-    fil = fil.filter(b => b.roomName === roomFilter);
-  }
-
+  // Filter 2 hari terakhir untuk User biasa (Admin bisa lihat semua)
   if (currentUser && currentUser.role !== 'admin') {
     fil = fil.filter(b => {
       const eventDate = new Date(b.date + 'T00:00:00');
@@ -1905,13 +2000,10 @@ function renderBookings() {
   fil.sort((a, b) => {
     const dateTimeA = a.date + 'T' + a.startTime;
     const dateTimeB = b.date + 'T' + b.startTime;
-    if (sortOpt === 'asc') {
-      return dateTimeA > dateTimeB ? 1 : -1;
-    } else {
-      return dateTimeA < dateTimeB ? 1 : -1;
-    }
+    return sortOpt === 'asc' ? (dateTimeA > dateTimeB ? 1 : -1) : (dateTimeA < dateTimeB ? 1 : -1);
   });
   
+  // Mencetak daftar HTML ke layar
   list.innerHTML = fil.map(b => {
     const currentStatus = getDynamicStatus(b);
     let badgeStyle = currentStatus === 'On Going' ? 'background:rgba(245,166,35,0.15); color:var(--warn); border:1px solid var(--warn);' : currentStatus === 'Scheduled' ? 'background:var(--ok-bg); color:var(--ok); border:1px solid var(--ok);' : 'background:#2f2f2f; color:#aaa;';
@@ -1923,7 +2015,6 @@ function renderBookings() {
       deleteButtonHtml = `<button class="bic" style="opacity: 0.25; cursor: not-allowed;" title="Proteksi Akses" disabled><i class="ti ti-lock"></i></button>`;
     }
 
-    // TOMBOL 4 BUAH: BA In, BA Out, Cetak Formulir Utama, Hapus
     let baInBtn = b.baCheckIn ? `<button class="bic" style="color:var(--ok); border-color:var(--ok);" onclick="viewPrintBA('${b.id}', 'in')" title="Cetak Form Berita Acara Masuk"><i class="ti ti-login"></i></button>` : '';
     let baOutBtn = b.baCheckOut ? `<button class="bic" style="color:var(--warn); border-color:var(--warn);" onclick="viewPrintBA('${b.id}', 'out')" title="Cetak Form Berita Acara Keluar"><i class="ti ti-logout"></i></button>` : '';
 
@@ -1946,7 +2037,6 @@ function renderBookings() {
     </div>`;
   }).join('');
 }
-
 function openBAModalOpen(id, type) {
   const b = bookings.find(x => x.id === id);
   if(!b) return;
@@ -2567,9 +2657,15 @@ function clearAllFilters() {
   if (document.getElementById('bsort')) document.getElementById('bsort').value = 'asc';
   const fRoomEl = document.getElementById('bfroom');
   if (fRoomEl) fRoomEl.value = ''; 
+  
+  // Reset tombol Booking Saya jika sedang aktif
+  if (isMyBookingsOnly) {
+    toggleMyBookings(); // Ini akan menonaktifkan tombol dan otomatis memanggil renderBookings()
+    return; 
+  }
+  
   renderBookings();
 }
-
 function initForm() {
   const sel = document.getElementById('f-room');
   if (!sel) return;
@@ -2767,6 +2863,7 @@ async function publishNewBulletinAction() {
     return;
   }
 
+  // Objek terisolasi khusus pengumuman
   const newAnnounce = {
     category: cat,
     title: title,
@@ -2777,11 +2874,22 @@ async function publishNewBulletinAction() {
   alertEl.innerHTML = `<div class="al al-warn">⏳ Menyiarkan ke sistem utama & Mengirim Email...</div>`;
   
   try {
+    // 1. KIRIM HANYA KE NODE BULLETINS (Tidak menyentuh bookings)
     await fbPost('bulletins', newAnnounce);
     
-    // ==========================================
-    // PENGIRIMAN EMAIL OTOMATIS KE SEMUA USER (BLAST)
-    // ==========================================
+    // 2. AMBIL ULANG DATA (SINKRONISASI AMAN)
+    // Memastikan fetch data tidak mengosongkan variabel lokal jika jaringan tidak stabil
+    const freshBookings = await fbGet('bookings');
+    if (freshBookings) {
+      bookings = Object.entries(freshBookings).map(([key, val]) => ({ ...val, _fbKey: key }));
+    }
+
+    const freshBulletins = await fbGet('bulletins');
+    if (freshBulletins) {
+      bulletins = Object.entries(freshBulletins).map(([key, val]) => ({ ...val, _fbKey: key }));
+    }
+
+    // 3. BLAST EMAIL
     users.forEach(u => {
         if(u.email) {
             sendSystemEmail(u.email, `[PENGUMUMAN PENTING] ${title}`, `Kategori: ${cat}\n\n${content}`);
@@ -2791,9 +2899,16 @@ async function publishNewBulletinAction() {
     alertEl.innerHTML = `<div class="al al-ok">✅ Pengumuman berhasil diterbitkan live dan diemail!</div>`;
     document.getElementById('b-form-title').value = '';
     document.getElementById('b-form-content').value = '';
-    fetchBookingsFromCloud(); 
+
+    // Render ulang tampilan tanpa reload penuh
+    renderHome();
+    if (document.getElementById('page-admin').classList.contains('on')) {
+      renderAdminBulletinAndMaintenance();
+    }
+
   } catch(e) {
-    alertEl.innerHTML = `<div class="al al-err">❌ Gagal menyambung ke server Firebase.</div>`;
+    console.error("Gagal menyiarkan pengumuman:", e);
+    alertEl.innerHTML = `<div class="al al-err">❌ Gagal menyambung ke server Firebase. Data jadwal Anda tetap aman.</div>`;
   }
 }
 
