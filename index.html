@@ -1518,7 +1518,10 @@ function fmtDate(d) {
   return `${days[x.getDay()]}, ${x.getDate()} ${mons[x.getMonth()]} ${x.getFullYear()}`;
 }
 function fmtShort(d) { const x = new Date(d + 'T00:00:00'); return `${x.getDate()}/${x.getMonth()+1}/${x.getFullYear()}`; }
-function getFacs(r) { return Array.isArray(r.facilities) ? r.facilities : r.facilities.split(',').map(f => f.trim()); }
+function getFacs(r) {
+if (!r.facilities) return []; 
+  return Array.isArray(r.facilities) ? r.facilities : r.facilities.split(',').map(f => f.trim()); 
+}
 
 function go(name) {
   if (name === 'admin' && (!currentUser || currentUser.role !== 'admin')) {
