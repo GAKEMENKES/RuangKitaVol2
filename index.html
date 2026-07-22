@@ -1093,12 +1093,23 @@ let baCanvas, baCtx, baIsDrawing = false, baHasDrawn = false;
 
 // --- 2. FUNGSI PENGAMBILAN KARTU ID (TOKEN) ---
 async function getAuthToken() {
+  const user = auth.currentUser;
+  if (user) {
+    try {
+      // Ambil token langsung dengan paksaan penyegaran (refresh) jika perlu
+      return await user.getIdToken();
+    } catch (e) {
+      console.warn("Gagal mendapatkan token:", e);
+      return '';
+    }
+  }
+  
+  // Jika auth.currentUser belum siap, tunggu sebentar (Fallback)
   return new Promise((resolve) => {
-    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+    const unsubscribe = auth.onAuthStateChanged(async (u) => {
       unsubscribe();
-      if (user) {
-        const token = await user.getIdToken();
-        resolve(token);
+      if (u) {
+        resolve(await u.getIdToken());
       } else {
         resolve('');
       }
@@ -1508,21 +1519,34 @@ function checkSession() {
   const authPage = document.getElementById('page-auth');
   const adminNav = document.getElementById('nav-admin');
 
-  if (currentUser) {
-    authPage.style.display = 'none';
-    topbar.style.display = 'flex';
-    adminNav.style.display = currentUser.role === 'admin' ? 'flex' : 'none';
+  // Gunakan listener Firebase agar pasti status loginnya
+  auth.onAuthStateChanged((user) => {
+    if (user && currentUser) {
+      // JIKA LOGIN BERHASIL
+      authPage.style.display = 'none';
+      topbar.style.display = 'flex';
+      adminNav.style.display = currentUser.role === 'admin' ? 'flex' : 'none';
 
-    if (document.getElementById('f-name')) document.getElementById('f-name').value = currentUser.name;
-    if (document.getElementById('f-dept')) document.getElementById('f-dept').value = currentUser.dept;
-    if (document.getElementById('f-email')) document.getElementById('f-email').value = currentUser.email;
+      if (document.getElementById('f-name')) document.getElementById('f-name').value = currentUser.name;
+      if (document.getElementById('f-dept')) document.getElementById('f-dept').value = currentUser.dept;
+      if (document.getElementById('f-email')) document.getElementById('f-email').value = currentUser.email;
 
-    go('home');
-  } else {
-    topbar.style.display = 'none';
-    authPage.style.display = 'block';
-    document.querySelectorAll('.page').forEach(p => { if (p.id !== 'page-auth') p.classList.remove('on'); });
-  }
+      // HANYA TARIK DATA SETELAH DIPASTIKAN LOGIN!
+      fetchBookingsFromCloud().then(() => {
+          // Setelah data ditarik, baru buka halaman
+          if (!document.querySelector('.page.on:not(#page-auth)')) {
+             go('home');
+          }
+      });
+
+    } else {
+      // JIKA TIDAK LOGIN
+      topbar.style.display = 'none';
+      authPage.style.display = 'block';
+      document.querySelectorAll('.page').forEach(p => { if (p.id !== 'page-auth') p.classList.remove('on'); });
+    }
+    updateFabVisibility(); // Pastikan tombol bantuan update
+  });
 }
 
 function handleLogout() {
@@ -3219,7 +3243,6 @@ function sendAiMessage() {
 
 document.getElementById('ai-input')?.addEventListener('keypress', function(e) { if (e.key === 'Enter') sendAiMessage(); });
 
-fetchBookingsFromCloud();
 checkSession();
 
 document.getElementById('f-date')?.addEventListener('change', function() {
