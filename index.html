@@ -1064,19 +1064,19 @@ function sendSystemEmail(to_email, subject, message) {
 
 // --- 1. INISIALISASI FIREBASE AUTH ---
 const firebaseConfig = {
-  apiKey: "AIzaSyAbLxus9T3wt5NN_EniG__p118cLjz2jvA",
-  authDomain: "ruangkita-4699a.firebaseapp.com",
-  databaseURL: "https://ruangkita-4699a-default-rtdb.firebaseio.com",
-  projectId: "ruangkita-4699a",
-  storageBucket: "ruangkita-4699a.firebasestorage.app",
-  messagingSenderId: "130495806349",
-  appId: "1:130495806349:web:383ed2ba5167b9b99fdbc4",
-  measurementId: "G-0RKH7NE73S"
+  apiKey: "AIzaSyCNfDHBxFk-teR1QAhdKwz0spd0_pnjqyw",
+  authDomain: "ruangkita-v2.firebaseapp.com",
+  databaseURL: "https://ruangkita-v2-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "ruangkita-v2",
+  storageBucket: "ruangkita-v2.firebasestorage.app",
+  messagingSenderId: "561082144218",
+  appId: "1:561082144218:web:bce7db7a30b84360fcdce3"
 };
+
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 
-const FIREBASE_URL = "https://ruangkita-4699a-default-rtdb.firebaseio.com/";
+const FIREBASE_URL = "https://ruangkita-v2-default-rtdb.asia-southeast1.firebasedatabase.app/";
 
 // Variabel rooms sekarang berawal dari array kosong dan murni diisi dari Firebase
 let rooms = [];
@@ -1088,6 +1088,24 @@ let currentUser = JSON.parse(localStorage.getItem('rb_current_user')) || null;
 let currentLoginRole = 'user';
 
 let baCanvas, baCtx, baIsDrawing = false, baHasDrawn = false;
+
+async function uploadToCloudinary(base64Data) {
+  if (!base64Data || base64Data.startsWith('http') || base64Data === 'default_room.png') return base64Data;
+  const cloudName = 'prascymb'; // Ganti milik Anda
+  const uploadPreset = 'ruangkita_preset'; // Ganti milik Anda
+  const url = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
+  const formData = new FormData();
+  formData.append('file', base64Data);
+  formData.append('upload_preset', uploadPreset);
+  try {
+    const response = await fetch(url, { method: 'POST', body: formData });
+    const data = await response.json();
+    return data.secure_url;
+  } catch (error) {
+    console.error('Error Cloudinary:', error);
+    throw new Error('Gagal unggah gambar.');
+  }
+}
 
 // --- 2. FUNGSI PENGAMBILAN KARTU ID (TOKEN) ---
 async function getAuthToken() {
@@ -2159,7 +2177,7 @@ function closeBAModal() {
   document.getElementById('modal-ba-logistik').style.display = 'none';
 }
 
-function submitBAData() {
+async function submitBAData() {
   if (!baHasDrawn) {
     alert("Maaf, Tanda Tangan Digital wajib Anda isi sebagai bentuk pertanggungjawaban!");
     return;
@@ -2192,7 +2210,7 @@ function submitBAData() {
   });
 
   // Proses Tanda Tangan (Sama seperti logika utama: konversi putih ke hitam agar jelas saat dicetak)
-  let ttdDataUrl = '';
+ let ttdDataUrl = '';
   if (baCanvas) {
     const tempCanvas = document.createElement('canvas');
     tempCanvas.width = baCanvas.width; tempCanvas.height = baCanvas.height;
@@ -2206,7 +2224,9 @@ function submitBAData() {
       }
     }
     tempCtx.putImageData(imgData, 0, 0);
-    ttdDataUrl = tempCanvas.toDataURL('image/png');
+    const rawBase64 = tempCanvas.toDataURL('image/png');
+
+    ttdDataUrl = await uploadToCloudinary(rawBase64);
   }
 
   const baObjData = {
@@ -2304,7 +2324,7 @@ if (targetRoomMaintenance && targetRoomMaintenance.scheduledMaintenance) {
     return;
   }
 
-  let ttdDataUrl = '';
+ let ttdDataUrl = '';
   if (canvas) {
     const tempCanvas = document.createElement('canvas');
     tempCanvas.width = canvas.width; tempCanvas.height = canvas.height;
@@ -2318,9 +2338,16 @@ if (targetRoomMaintenance && targetRoomMaintenance.scheduledMaintenance) {
       }
     }
     tempCtx.putImageData(imgData, 0, 0);
-    ttdDataUrl = tempCanvas.toDataURL('image/png');
+    const rawBase64 = tempCanvas.toDataURL('image/png');
+
+    try {
+       ttdDataUrl = await uploadToCloudinary(rawBase64);
+    } catch(e) {
+       el.innerHTML = `<div class="al al-err">❌ Gagal mengunggah tanda tangan.</div>`;
+       return;
+    }
   }
-  
+
   const eventType = document.getElementById('f-type').value;
   const eventAttendees = document.getElementById('f-notes').value.trim() || '-';
   const participantCount = document.getElementById('f-att').value || '0'; // <--- TAMBAHAN BARU
@@ -3072,7 +3099,9 @@ async function saveMasterRoomAction() {
       alert('Ukuran gambar terlalu besar! Maksimal 500KB. Kompres foto Anda terlebih dahulu.');
       return;
     }
-    finalImageUrl = await readAsBase64(file);
+    const localBase64 = await readAsBase64(file);
+    alert('⏳ Sedang mengunggah foto ruangan ke server cloud...');
+    finalImageUrl = await uploadToCloudinary(localBase64);
   }
 
   const targetId = editId || 'r' + Date.now();
