@@ -553,6 +553,7 @@ body {
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 </head>
 <body>
 
@@ -1278,7 +1279,41 @@ async function fetchBookingsFromCloud() {
     } catch(e){}
   }
 }
-setInterval(() => { if (currentUser) fetchBookingsFromCloud(); }, 30000);
+// GANTI DENGAN KODE INI:
+// Realtime Listener Khusus untuk Update Jadwal Booking
+firebase.database().ref('bookings').on('value', (snapshot) => {
+  // Jangan jalankan jika user belum login
+  if (!currentUser) return; 
+
+  const data = snapshot.val();
+  if (data) {
+    bookings = Object.entries(data)
+      .filter(([key, val]) => val !== null)
+      .map(([key, val]) => ({
+          ...val,
+          _fbKey: key,
+          eventName: val.eventName || 'Agenda Tanpa Nama',
+          applicantName: val.applicantName || 'User Unknown',
+          date: val.date || '2025-01-01',
+          startTime: val.startTime || '00:00',
+          endTime: val.endTime || '00:00',
+          roomName: val.roomName || 'Ruangan Unknown',
+          department: val.department || '-'
+      }));
+  } else {
+    bookings = [];
+  }
+
+  // Refresh tampilan layar yang sedang aktif secara halus (tanpa reload web)
+  if (document.getElementById('page-home').classList.contains('on')) renderHome();
+  else if (document.getElementById('page-bookings').classList.contains('on')) renderBookings();
+  else if (document.getElementById('page-admin').classList.contains('on')) {
+    const activeTabBtn = document.getElementById('page-admin').querySelector('.tab.on');
+    if (activeTabBtn && activeTabBtn.getAttribute('onclick').includes('t-bk')) {
+      renderAdminTable();
+    }
+  }
+});
 let editId = null, selRoom = null;
 let canvas, ctx, isDrawing = false;
 let activeBAId = null, baType = 'in';
