@@ -656,6 +656,17 @@ body {
         <label>Kata Sandi Baru *</label>
         <input type="password" id="reg-pass" placeholder="••••••••">
       </div>
+<!-- TAMBAHAN BARU: Tanda Tangan Registrasi -->
+      <div class="fg" style="grid-column: 1 / -1;">
+        <label>Tanda Tangan Digital Pemohon *</label>
+        <p style="font-size: 11px; color: var(--muted); margin-bottom: 5px;">Tanda tangan ini akan digunakan otomatis pada setiap Berita Acara / Form Peminjaman Anda.</p>
+        <div style="position: relative; background: #262626; border: 1px solid var(--bdr2); border-radius: 12px; width: 100%; height: 160px; overflow: hidden;">
+          <canvas id="reg-signature-pad" style="width: 100%; height: 100%; cursor: crosshair; display: block; touch-action: none;"></canvas>
+          <button type="button" class="btn-sec" onclick="clearRegSignature()" style="position: absolute; bottom: 10px; right: 10px; padding: 5px 12px; font-size: 11px; height: auto;">
+            <i class="ti ti-refresh"></i> Ulangi
+          </button>
+        </div>
+      </div>
       <button class="btn-pri" onclick="handleRegister()" style="width: 100%; justify-content: center; margin-top: 10px; height: 45px;">
         Selesaikan Pendaftaran
       </button>
@@ -679,13 +690,19 @@ body {
       <button class="nb" onclick="go('admin')" id="nav-admin"><i class="ti ti-shield-lock"></i>Admin</button>
     </nav> 
     <div style="height: 20px; width: 1px; background-color: var(--bdr2);"></div>
+    
+    <!-- TOMBOL PROFIL MODERN BARU -->
+    <button class="nb" onclick="openEditAccountModal()" style="color: #ffffff; white-space: nowrap; padding: 7px 0;" title="Pengaturan Akun Anda">
+      <i class="ti ti-user-circle" style="font-size: 16px;"></i>Profil
+    </button>
+    
     <button class="nb" onclick="handleLogout()" style="color: var(--acc); white-space: nowrap; padding: 7px 0;"><i class="ti ti-logout"></i>Keluar</button>
   </div>
 </div>
-
 <div class="page" id="page-home">
   <div class="hero">
-    <div class="hero-tag can-edit" id="hero-user-greet" onclick="openEditAccountModal()" title="Klik untuk edit profil akun Anda">Selamat Datang Di</div>
+    <div class="hero-tag" id="hero-user-greet">Selamat Datang Di</div>
+
     <h1><span>R</span>uangKita <br>Satu Platform Untuk<br>Kebutuhan Ruangan Anda</h1>
     <p>Solusi booking ruang rapat tanpa ribet.</p>
     <div class="hero-btns">
@@ -738,13 +755,13 @@ body {
     </div>
   </div>
   <div class="filter-bar" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-    <input type="text" id="bsrch" placeholder="Cari berdasarkan nama acara atau pemohon..." oninput="renderBookings()">
-    <input type="date" id="bdate-search" onchange="renderBookings()" title="Cari berdasarkan tanggal acara">
-    <select id="bsort" onchange="renderBookings()">
+    <input type="text" id="bsrch" placeholder="Cari berdasarkan nama acara atau pemohon..." oninput="currentBookingPage=1; renderBookings()">
+    <input type="date" id="bdate-search" onchange="currentBookingPage=1; renderBookings()" title="Cari berdasarkan tanggal acara">
+    <select id="bsort" onchange="currentBookingPage=1; renderBookings()">
       <option value="asc">Tanggal Terdekat (Ascending)</option>
       <option value="desc">Tanggal Terjauh (Descending)</option>
     </select>
-    <select id="bfroom" onchange="renderBookings()">
+    <select id="bfroom" onchange="currentBookingPage=1; renderBookings()">
       <option value="">Filter Ruangan</option>
     </select>
     <button class="btn-pri" type="button" onclick="clearAllFilters()" style="background: #e50914; color: white; border: none; padding: 8px 14px; cursor: pointer; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 5px;">
@@ -800,17 +817,7 @@ body {
     <div class="form-grid">
       <div class="fg"><label>NAMA LENGKAP PEMOHON *</label><input type="text" id="f-name" disabled></div>
       <div class="fg"><label>UNIT / DEPARTEMEN ASAL *</label><input type="text" id="f-dept" disabled></div>
-      <div class="fg"><label>NOMOR HP</label><input type="text" id="f-phone" placeholder="Contoh: 0812xxxxxxxx / Ext 201"></div>
-      <div class="fg"><label>ALAMAT EMAIL PEMOHON</label><input type="email" id="f-email" disabled></div>
-      <div class="fg full" style="margin-top: 10px;">
-        <label>Tanda Tangan Online (Gunakan Kursor / Touchscreen) *</label>
-        <div style="position: relative; background: #262626; border: 1px solid var(--bdr2); border-radius: 12px; width: 100%; max-width: 400px; height: 180px; overflow: hidden;">
-          <canvas id="signature-pad" style="width: 100%; height: 100%; cursor: crosshair; display: block;"></canvas>
-          <button type="button" class="btn-sec" onclick="clearSignature()" style="position: absolute; bottom: 10px; right: 10px; padding: 5px 12px; font-size: 11px; height: auto;">
-            <i class="ti ti-refresh"></i> Bersihkan
-          </button>
-        </div>
-      </div>
+            <div class="fg"><label>ALAMAT EMAIL PEMOHON</label><input type="email" id="f-email" disabled></div>
     </div>
   </div>
 
@@ -860,9 +867,11 @@ body {
 </div>
 
 <div class="modal-bg" id="modal-edit-account">
-  <div class="modal" style="max-width: 450px;">
+  <div class="modal" style="max-width: 480px;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-      <h3 style="font-weight: 800; font-size: 18px; color: #fff;"><i class="ti ti-user-edit" style="color: var(--acc); margin-right: 8px;"></i>Edit Profil Akun Anda</h3>
+      <h3 style="font-weight: 800; font-size: 18px; color: #fff;">
+        <i class="ti ti-user-edit" style="color: var(--acc); margin-right: 8px;"></i>Edit Profil Akun Anda
+      </h3>
       <button class="ai-x" style="background:none; border:none; color:var(--muted); font-size:22px; cursor:pointer;" onclick="closeEditAccountModal()">&times;</button>
     </div>
     <div class="form-grid" style="grid-template-columns: 1fr; gap: 16px;">
@@ -875,12 +884,12 @@ body {
         <select id="edit-acc-dept">
           <option value="">— Pilih Unit Kerja / Departemen —</option>
           <option value="Sekretaris Direksi">Sekretaris Direksi</option>
-          <option value="Sekretaris Departement Medik">Sekretaris Departement Kardiovaskular</option>
-          <option value="Sekretaris Departement Medik">Sekretaris Departement Neurologi</option>
+          <option value="Sekretaris Departement Kardiovaskular">Sekretaris Departement Kardiovaskular</option>
+          <option value="Sekretaris Departement Neurologi">Sekretaris Departement Neurologi</option>
           <option value="Sekretaris Departement Medik">Sekretaris Departement Medik</option>
-          <option value="Sekretaris Departement Medik">Sekretaris Departement Onkologi</option>
-          <option value="Sekretaris Departement Medik">Sekretaris Departement Ibu & Anak</option>
-          <option value="Sekretaris Departement Medik">Sekretaris Departement Penunjang</option>
+          <option value="Sekretaris Departement Onkologi">Sekretaris Departement Onkologi</option>
+          <option value="Sekretaris Departement Ibu & Anak">Sekretaris Departement Ibu & Anak</option>
+          <option value="Sekretaris Departement Penunjang">Sekretaris Departement Penunjang</option>
           <option value="SDM">SDM</option>
           <option value="Diklat">Diklat</option>
           <option value="CRU">CRU</option>
@@ -901,10 +910,23 @@ body {
           <option value="Laboratorium">Laboratorium</option>
         </select>
       </div>
-      <div style="font-size: 11.5px; color: var(--muted); line-height: 1.4;">
-        * Setelah data disimpan, sapaan di beranda utama dan data otomatis pengajuan formulir baru akan langsung diperbarui.
+
+      <!-- SOLUSI AKUN LAMA: Form TTD Pintar -->
+      <div class="fg" style="grid-column: 1 / -1;">
+        <label>Tanda Tangan Digital</label>
+        <div id="acc-sig-status" style="font-size: 11.5px; font-weight: 600; margin-bottom: 6px;"></div>
+        <div style="position: relative; background: #262626; border: 1px solid var(--bdr2); border-radius: 12px; width: 100%; height: 160px; overflow: hidden;">
+          <canvas id="acc-signature-pad" style="width: 100%; height: 100%; cursor: crosshair; display: block; touch-action: none;"></canvas>
+          <button type="button" class="btn-sec" onclick="clearAccSignature()" style="position: absolute; bottom: 10px; right: 10px; padding: 5px 12px; font-size: 11px; height: auto;">
+            <i class="ti ti-refresh"></i> Bersihkan
+          </button>
+        </div>
       </div>
-      <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 10px;">
+
+      <div style="font-size: 11.5px; color: var(--muted); line-height: 1.4; grid-column: 1 / -1;">
+        * Sapaan di beranda dan data pengajuan form Anda akan langsung diperbarui setelah disimpan.
+      </div>
+      <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 10px; grid-column: 1 / -1;">
         <button class="btn-sec" onclick="closeEditAccountModal()">Batal</button>
         <button class="btn-pri" onclick="saveAccountUpdates()"><i class="ti ti-device-floppy"></i> Simpan Perubahan</button>
       </div>
@@ -1098,6 +1120,8 @@ let waNum = '';
 let users = []; // Dikosongkan karena password dikelola langsung oleh Firebase Auth
 let currentUser = JSON.parse(localStorage.getItem('rb_current_user')) || null;
 let currentLoginRole = 'user';
+let currentBookingPage = 1;
+const itemsPerPage = 10;
 
 let baCanvas, baCtx, baIsDrawing = false, baHasDrawn = false;
 
@@ -1443,6 +1467,10 @@ function switchAuthMode(mode) {
   if (mode === 'reg') {
     loginBox.style.display = 'none';
     regBox.style.display = 'block';
+    
+    // Ini yang akan memanggil kanvas registrasi agar bisa dicoret
+    setTimeout(initRegSignaturePad, 300); 
+    
   } else {
     loginBox.style.display = 'block';
     regBox.style.display = 'none';
@@ -1453,7 +1481,13 @@ function switchAuthMode(mode) {
 
 function renderAdminTable() {
   const sorted = [...bookings].sort((a,b) => a.date < b.date ? 1 : -1);
-  document.getElementById('t-bk').innerHTML = `<table class="at" style="width:100%; margin-top:15px;"><thead><tr><th>ID Berkas</th><th>Agenda</th><th>Level</th><th>Pemohon</th><th>BA Masuk</th><th>BA Keluar</th><th>Aksi</th></tr></thead><tbody>
+  document.getElementById('t-bk').innerHTML = `
+    <div style="display:flex; justify-content:flex-end; margin-bottom:15px;">
+      <button class="btn-wa" onclick="archiveOldBookings()" style="background:#404040; border:1px solid #555;">
+        <i class="ti ti-archive"></i> Arsipkan Data > 3 Bulan
+      </button>
+    </div>
+    <table class="at" style="width:100%; margin-top:15px;"><thead><tr><th>ID Berkas</th><th>Agenda</th><th>Level</th><th>Pemohon</th><th>BA Masuk</th><th>BA Keluar</th><th>Aksi</th></tr></thead><tbody>
     ${sorted.map(b=>`<tr>
       <td>${b.id}</td>
       <td><b>${b.eventName}</b></td>
@@ -1463,6 +1497,34 @@ function renderAdminTable() {
       <td style="color:${b.baCheckOut?'var(--ok)':'var(--err)'}">${b.baCheckOut?'✓ '+b.baCheckOut.time:'❌ No'}</td>
       <td><button class="bic del" onclick="delBk('${b.id}')"><i class="ti ti-trash"></i></button></td>
     </tr>`).join('')}</tbody></table>`;
+}
+
+async function archiveOldBookings() {
+  if (!confirm('Pindahkan jadwal yang lebih dari 3 bulan dan berstatus selesai ke Arsip? Data ini akan dipindahkan agar sistem utama tetap ringan.')) return;
+  
+  const threeMonthsAgo = new Date();
+  threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+  const cutoffDate = threeMonthsAgo.toISOString().split('T')[0];
+
+  const toArchive = bookings.filter(b => b.date < cutoffDate && b.baCheckOut);
+  
+  if (toArchive.length === 0) { 
+      alert('Tidak ada data usang yang memenuhi kriteria (Selesai > 3 bulan) untuk diarsipkan.'); 
+      return; 
+  }
+
+  alert(`Memproses pemindahan ${toArchive.length} data ke Arsip. Mohon tunggu...`);
+  
+  try {
+    for (let b of toArchive) {
+      await fbPut(`bookings_archive/${b.id}`, b);
+      await fbDelete(`bookings/${b._fbKey}`);
+    }
+    alert('Arsip berhasil! Database utama sekarang lebih ringan.');
+    fetchBookingsFromCloud(); 
+  } catch(e) {
+    alert('Gagal mengarsipkan sebagian data. Periksa koneksi internet Anda.');
+  }
 }
 
 function renderAdminMasterRooms() {
@@ -1517,17 +1579,55 @@ async function handleRegister() {
     alertBox.innerHTML = `<div class="al al-warn" style="margin:0 0 15px 0">Harap isi semua kolom wajib pendaftaran.</div>`;
     return;
   }
-
-  alertBox.innerHTML = `<div class="al al-warn" style="margin:0 0 15px 0">Memproses Enkripsi Akun...</div>`;
   
+  if (!regHasDrawn) {
+    alertBox.innerHTML = `<div class="al al-warn" style="margin:0 0 15px 0">Tanda Tangan Digital wajib diisi!</div>`;
+    return;
+  }
+
+  alertBox.innerHTML = `<div class="al al-warn" style="margin:0 0 15px 0">Memproses Enkripsi & Mengunggah Tanda Tangan...</div>`;
+  
+  // 1. PROSES KANVAS TANDA TANGAN KE CLOUDINARY
+  const tempCanvas = document.createElement('canvas');
+  tempCanvas.width = regCanvas.width; tempCanvas.height = regCanvas.height;
+  const tempCtx = tempCanvas.getContext('2d');
+  tempCtx.lineWidth = 3; tempCtx.lineCap = 'round'; tempCtx.lineJoin = 'round'; tempCtx.strokeStyle = '#111111';
+  tempCtx.drawImage(regCanvas, 0, 0);
+  
+  const imgData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+  for (let i = 0; i < imgData.data.length; i += 4) {
+    if (imgData.data[i] > 200 && imgData.data[i+1] > 200 && imgData.data[i+2] > 200) {
+      imgData.data[i] = 17; imgData.data[i+1] = 17; imgData.data[i+2] = 17;
+    }
+  }
+  tempCtx.putImageData(imgData, 0, 0);
+  const rawBase64 = tempCanvas.toDataURL('image/png');
+  
+  let finalSignatureUrl = '';
+  try {
+      finalSignatureUrl = await uploadToCloudinary(rawBase64);
+  } catch(e) {
+      alertBox.innerHTML = `<div class="al al-err" style="margin:0 0 15px 0">Gagal mengunggah Tanda Tangan. Periksa internet Anda.</div>`;
+      return;
+  }
+
+  // 2. PROSES PEMBUATAN AKUN FIREBASE AUTH
   try {
     const userCredential = await auth.createUserWithEmailAndPassword(email, pass);
     const user = userCredential.user;
 
-    const newUser = { email, name, dept, role: 'user', uid: user.uid };
+    // Simpan Data Profil + TTD ke Firebase Realtime Database
+    const newUser = { 
+        email, 
+        name, 
+        dept, 
+        role: 'user', 
+        uid: user.uid, 
+        signature: finalSignatureUrl // <-- Menyimpan TTD di profil 
+    };
     await fbPut(`users/${user.uid}`, newUser); 
 
-    alertBox.innerHTML = `<div class="al al-ok" style="margin:0 0 15px 0">Registrasi Berhasil! Sistem sudah diamankan.</div>`;
+    alertBox.innerHTML = `<div class="al al-ok" style="margin:0 0 15px 0">Registrasi Berhasil! Silakan Masuk.</div>`;
     setTimeout(() => switchAuthMode('login'), 1500);
   } catch(e) {
     let msg = "Terjadi kesalahan jaringan.";
@@ -1536,7 +1636,6 @@ async function handleRegister() {
     alertBox.innerHTML = `<div class="al al-err" style="margin:0 0 15px 0">${msg}</div>`;
   }
 }
-
 async function handleLogin() {
   const email = document.getElementById('log-email').value.trim().toLowerCase();
   const pass = document.getElementById('log-pass').value;
@@ -2116,8 +2215,11 @@ function renderBookings() {
     return sortOpt === 'asc' ? (dateTimeA > dateTimeB ? 1 : -1) : (dateTimeA < dateTimeB ? 1 : -1);
   });
   
-  // Mencetak daftar HTML ke layar
-  list.innerHTML = fil.map(b => {
+  // --- PAGINATION LOGIC ---
+  const limit = currentBookingPage * itemsPerPage;
+  const paginatedFil = fil.slice(0, limit);
+
+  list.innerHTML = paginatedFil.map(b => {
     const currentStatus = getDynamicStatus(b);
     let badgeStyle = currentStatus === 'On Going' ? 'background:rgba(245,166,35,0.15); color:var(--warn); border:1px solid var(--warn);' : currentStatus === 'Scheduled' ? 'background:var(--ok-bg); color:var(--ok); border:1px solid var(--ok);' : 'background:#2f2f2f; color:#aaa;';
     
@@ -2149,7 +2251,19 @@ function renderBookings() {
       </div>
     </div>`;
   }).join('');
-}
+
+  // Tampilkan Tombol Load More jika masih ada sisa data
+  if (fil.length > limit) {
+      list.innerHTML += `
+      <div style="display:flex; justify-content:center; margin-top:20px;">
+          <button class="btn-sec" onclick="currentBookingPage++; renderBookings();" style="border-radius:20px; font-size:12.5px;">
+              <i class="ti ti-reload"></i> Muat Lebih Banyak (${fil.length - limit} jadwal tersisa)
+          </button>
+      </div>`;
+  } else if (fil.length === 0) {
+      list.innerHTML = `<div style="text-align:center; padding:40px; color:var(--muted);">Tidak ada jadwal yang sesuai kriteria.</div>`;
+  }
+} // <--- Penutup fungsi renderBookings()
 function openBAModalOpen(id, type) {
   const b = bookings.find(x => x.id === id);
   if(!b) return;
@@ -2193,17 +2307,7 @@ function openBAModalOpen(id, type) {
       <input type="text" id="ba-notes" placeholder="${type === 'in' ? 'Contoh: TV tidak menyala karena tidak ada kabel HDMI nya' : 'Contoh: AC & Lampu mati rapi, ruangan bersih'}">
     </div>
 
-    <!-- TANDA TANGAN WAJIB UNTUK BA -->
-    <div class="fg" style="margin-top:15px;">
-      <label style="color:var(--acc); font-weight:800;">TANDA TANGAN USER (WAJIB) *</label>
-      <div style="position: relative; background: #262626; border: 1px solid var(--bdr2); border-radius: 12px; width: 100%; height: 140px; margin-top:5px; overflow: hidden;">
-        <canvas id="ba-signature-pad" style="width: 100%; height: 100%; cursor: crosshair; display: block;"></canvas>
-        <button type="button" class="btn-sec" onclick="clearBASignature()" style="position: absolute; bottom: 8px; right: 8px; padding: 4px 10px; font-size: 11px; height: auto;">
-          <i class="ti ti-refresh"></i> Bersihkan
-        </button>
-      </div>
-    </div>
-
+   
     <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 22px;">
       <button class="btn-sec" onclick="closeBAModal()" style="padding: 10px 20px; font-size: 13px;">Batal</button>
       <button class="btn-pri" onclick="submitBAData()" style="padding: 10px 20px; font-size: 13px; background:${type==='in'?'var(--ok)':'var(--acc)'}; color:${type==='in'?'#141414':'#fff'};">
@@ -2256,25 +2360,11 @@ async function submitBAData() {
   });
 
   // Proses Tanda Tangan (Sama seperti logika utama: konversi putih ke hitam agar jelas saat dicetak)
- let ttdDataUrl = '';
-  if (baCanvas) {
-    const tempCanvas = document.createElement('canvas');
-    tempCanvas.width = baCanvas.width; tempCanvas.height = baCanvas.height;
-    const tempCtx = tempCanvas.getContext('2d');
-    tempCtx.lineWidth = 3; tempCtx.lineCap = 'round'; tempCtx.lineJoin = 'round'; tempCtx.strokeStyle = '#111111';
-    tempCtx.drawImage(baCanvas, 0, 0);
-    const imgData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
-    for (let i = 0; i < imgData.data.length; i += 4) {
-      if (imgData.data[i] > 200 && imgData.data[i+1] > 200 && imgData.data[i+2] > 200) {
-        imgData.data[i] = 17; imgData.data[i+1] = 17; imgData.data[i+2] = 17;
-      }
-    }
-    tempCtx.putImageData(imgData, 0, 0);
-    const rawBase64 = tempCanvas.toDataURL('image/png');
-
-    ttdDataUrl = await uploadToCloudinary(rawBase64);
+ const ttdDataUrl = currentUser.signature;
+  if (!ttdDataUrl) { 
+      alert("Silakan lengkapi Tanda Tangan Anda di menu Edit Profil (Pojok Kanan Atas) terlebih dahulu sebelum mengisi Berita Acara."); 
+      return; 
   }
-
   const baObjData = {
     time: timeNow, 
     notes: note || (baType === 'in' ? 'Fasilitas diverifikasi melalui sistem.' : 'Ruangan dikembalikan.'),
@@ -2370,30 +2460,11 @@ if (targetRoomMaintenance && targetRoomMaintenance.scheduledMaintenance) {
     return;
   }
 
- let ttdDataUrl = '';
-  if (canvas) {
-    const tempCanvas = document.createElement('canvas');
-    tempCanvas.width = canvas.width; tempCanvas.height = canvas.height;
-    const tempCtx = tempCanvas.getContext('2d');
-    tempCtx.lineWidth = 3; tempCtx.lineCap = 'round'; tempCtx.lineJoin = 'round'; tempCtx.strokeStyle = '#111111';
-    tempCtx.drawImage(canvas, 0, 0);
-    const imgData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
-    for (let i = 0; i < imgData.data.length; i += 4) {
-      if (imgData.data[i] > 200 && imgData.data[i+1] > 200 && imgData.data[i+2] > 200) {
-        imgData.data[i] = 17; imgData.data[i+1] = 17; imgData.data[i+2] = 17;
-      }
-    }
-    tempCtx.putImageData(imgData, 0, 0);
-    const rawBase64 = tempCanvas.toDataURL('image/png');
-
-    try {
-       ttdDataUrl = await uploadToCloudinary(rawBase64);
-    } catch(e) {
-       el.innerHTML = `<div class="al al-err">❌ Gagal mengunggah tanda tangan.</div>`;
-       return;
-    }
+ const ttdDataUrl = currentUser.signature;
+  if (!ttdDataUrl) { 
+      el.innerHTML = `<div class="al al-err">Silakan lengkapi Tanda Tangan Anda di menu Edit Profil (Pojok Kanan Atas) terlebih dahulu.</div>`; 
+      return; 
   }
-
   const eventType = document.getElementById('f-type').value;
   const eventAttendees = document.getElementById('f-notes').value.trim() || '-';
   const participantCount = document.getElementById('f-att').value || '0'; // <--- TAMBAHAN BARU
@@ -3235,20 +3306,25 @@ function openEditAccountModal() {
   document.getElementById('edit-acc-dept').value = currentUser.dept || '';
   document.getElementById('modal-edit-account').style.display = 'flex';
 }
-function closeEditAccountModal() { document.getElementById('modal-edit-account').style.display = 'none'; }
-function saveAccountUpdates() {
+
+async function saveAccountUpdates() {
   const n = document.getElementById('edit-acc-name').value.trim();
   const d = document.getElementById('edit-acc-dept').value.trim();
   if(!n) return;
-  users = users.map(u => u.email === currentUser.email ? {...u, name:n, dept:d} : u);
   
-  // Update ke lokal device saat ini
-  currentUser.name = n; currentUser.dept = d;
-  localStorage.setItem('rb_current_user', JSON.stringify(currentUser));
-  
-  closeEditAccountModal(); renderHome(); alert('Profil Diperbarui!');
+  try {
+      await fbPatch(`users/${currentUser.uid}`, { name: n, dept: d, signature: finalSignature });
+      currentUser.name = n; 
+      currentUser.dept = d;
+      currentUser.signature = finalSignature;
+      localStorage.setItem('rb_current_user', JSON.stringify(currentUser));
+      closeEditAccountModal(); 
+      renderHome(); 
+      alert('Profil & Tanda Tangan Diperbarui!');
+  } catch(e) {
+      alert('Gagal menyimpan profil ke server.');
+  }
 }
-
 function updateFabVisibility() {
   const fab = document.getElementById('fab-help-btn');
   if (fab) { fab.style.display = currentUser ? 'flex' : 'none'; }
@@ -3528,6 +3604,216 @@ function copyRecapToWA() {
   }).catch(err => {
     alert('Gagal menyalin format: ', err);
   });
+}
+
+// ==========================================
+// LOGIKA EDIT PROFIL & TTD AKUN LAMA (ANTI-GAGAL)
+// ==========================================
+let accCanvas, accCtx, accIsDrawing = false, accHasDrawn = false;
+
+function initAccSignaturePad() {
+  accCanvas = document.getElementById('acc-signature-pad');
+  if (!accCanvas) return;
+  
+  // Mengambil dimensi asli kanvas SECARA PAKSA setelah pop-up benar-benar terbuka
+  const rect = accCanvas.getBoundingClientRect();
+  accCanvas.width = rect.width || 440;
+  accCanvas.height = rect.height || 160;
+
+  accCtx = accCanvas.getContext('2d');
+  accCtx.strokeStyle = '#ffffff'; 
+  accCtx.lineWidth = 3;             
+  accCtx.lineCap = 'round';
+  accCtx.lineJoin = 'round';
+  accHasDrawn = false;
+  accIsDrawing = false;
+
+  // Fungsi menggambar
+  const startDraw = (e) => { accIsDrawing = true; accHasDrawn = true; accDraw(e); };
+  const moveDraw = (e) => { if (!accIsDrawing) return; accDraw(e); };
+  const stopDraw = () => { accIsDrawing = false; accCtx.beginPath(); };
+
+  // Hapus semua event listener lama agar kursor tidak ganda/melayang
+  const newCanvas = accCanvas.cloneNode(true);
+  accCanvas.parentNode.replaceChild(newCanvas, accCanvas);
+  accCanvas = newCanvas;
+  accCtx = accCanvas.getContext('2d');
+  accCtx.strokeStyle = '#ffffff'; 
+  accCtx.lineWidth = 3;             
+  accCtx.lineCap = 'round';
+  accCtx.lineJoin = 'round';
+
+  // Pasang ulang pelacak kursor (Mouse & Touch)
+  accCanvas.addEventListener('mousedown', startDraw);
+  accCanvas.addEventListener('mousemove', moveDraw);
+  accCanvas.addEventListener('mouseup', stopDraw);
+  accCanvas.addEventListener('mouseout', stopDraw);
+
+  accCanvas.addEventListener('touchstart', (e) => { startDraw(e.touches[0]); e.preventDefault(); }, {passive: false});
+  accCanvas.addEventListener('touchmove', (e) => { moveDraw(e.touches[0]); e.preventDefault(); }, {passive: false});
+  accCanvas.addEventListener('touchend', stopDraw);
+}
+
+function accDraw(e) {
+  if (!accIsDrawing) return;
+  const rect = accCanvas.getBoundingClientRect();
+  accCtx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+  accCtx.stroke();
+  accCtx.beginPath();
+  accCtx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+}
+
+function clearAccSignature() {
+  if (accCtx) accCtx.clearRect(0, 0, accCanvas.width, accCanvas.height);
+  accHasDrawn = false;
+}
+
+function closeEditAccountModal() { 
+  document.getElementById('modal-edit-account').style.display = 'none'; 
+  clearAccSignature(); 
+}
+
+function openEditAccountModal() {
+  if (!currentUser) return;
+  document.getElementById('edit-acc-name').value = currentUser.name || '';
+  document.getElementById('edit-acc-dept').value = currentUser.dept || '';
+  
+  const statusEl = document.getElementById('acc-sig-status');
+  if (currentUser.signature) {
+      statusEl.innerHTML = '✓ Tanda Tangan Anda sudah aman. Abaikan kotak ini jika tidak ingin mengubahnya.';
+      statusEl.style.color = 'var(--ok)';
+  } else {
+      statusEl.innerHTML = '⚠️ PERHATIAN: Anda pengguna lama. Wajib menggambar Tanda Tangan di bawah ini.';
+      statusEl.style.color = 'var(--warn)';
+  }
+
+  // Tampilkan pop-up
+  document.getElementById('modal-edit-account').style.display = 'flex';
+  
+  // Beri waktu 300ms agar animasi pop-up selesai, baru render ukuran kanvas
+  setTimeout(initAccSignaturePad, 300); 
+}
+
+async function saveAccountUpdates() {
+  const n = document.getElementById('edit-acc-name').value.trim();
+  const d = document.getElementById('edit-acc-dept').value.trim();
+  const statusEl = document.getElementById('acc-sig-status');
+  
+  if (!n) {
+      alert("Nama lengkap akun tidak boleh kosong!");
+      return;
+  }
+
+  // Tolak simpan jika akun lama belum punya TTD dan tidak menggambar
+  if (!currentUser.signature && !accHasDrawn) {
+      alert("Akses Ditolak: Anda belum memiliki Tanda Tangan Digital. Silakan coret di kotak yang tersedia.");
+      return;
+  }
+
+  let finalSignature = currentUser.signature || '';
+
+  // Proses upload jika ada coretan baru
+  if (accHasDrawn) {
+      statusEl.innerHTML = '⏳ Memproses unggahan tanda tangan...';
+      statusEl.style.color = 'var(--info)';
+
+      const tempCanvas = document.createElement('canvas');
+      tempCanvas.width = accCanvas.width; tempCanvas.height = accCanvas.height;
+      const tempCtx = tempCanvas.getContext('2d');
+      tempCtx.lineWidth = 3; tempCtx.lineCap = 'round'; tempCtx.lineJoin = 'round'; tempCtx.strokeStyle = '#111111';
+      tempCtx.drawImage(accCanvas, 0, 0);
+      
+      const imgData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+      for (let i = 0; i < imgData.data.length; i += 4) {
+        if (imgData.data[i] > 200 && imgData.data[i+1] > 200 && imgData.data[i+2] > 200) {
+          imgData.data[i] = 17; imgData.data[i+1] = 17; imgData.data[i+2] = 17;
+        }
+      }
+      tempCtx.putImageData(imgData, 0, 0);
+      const rawBase64 = tempCanvas.toDataURL('image/png');
+      
+      try {
+          finalSignature = await uploadToCloudinary(rawBase64);
+      } catch(e) {
+          alert('Gagal mengunggah tanda tangan. Silakan periksa koneksi internet Anda.'); 
+          statusEl.innerHTML = '❌ Gagal Mengunggah. Coba lagi.';
+          statusEl.style.color = 'var(--err)';
+          return;
+      }
+  }
+
+  statusEl.innerHTML = '⏳ Menyimpan ke database...';
+  
+  try {
+      await fbPatch(`users/${currentUser.uid}`, { name: n, dept: d, signature: finalSignature });
+      
+      currentUser.name = n; 
+      currentUser.dept = d;
+      currentUser.signature = finalSignature;
+      localStorage.setItem('rb_current_user', JSON.stringify(currentUser));
+      
+      closeEditAccountModal(); 
+      renderHome(); 
+      alert('Berhasil! Profil dan Tanda Tangan Anda telah diperbarui.');
+  } catch(e) {
+      alert('Gagal menyimpan profil ke server utama.');
+      statusEl.innerHTML = '❌ Server Error';
+  }
+}
+
+// ==========================================
+// LOGIKA KANVAS TANDA TANGAN REGISTRASI (ANTI-GAGAL)
+// ==========================================
+let regCanvas, regCtx, regIsDrawing = false, regHasDrawn = false;
+
+function initRegSignaturePad() {
+  regCanvas = document.getElementById('reg-signature-pad');
+  if (!regCanvas) return;
+
+  // Mengambil dimensi asli kanvas SECARA PAKSA
+  const rect = regCanvas.getBoundingClientRect();
+  regCanvas.width = rect.width || 420;
+  regCanvas.height = rect.height || 160;
+
+  // Hapus semua event listener lama agar kursor stabil
+  const newCanvas = regCanvas.cloneNode(true);
+  regCanvas.parentNode.replaceChild(newCanvas, regCanvas);
+  regCanvas = newCanvas;
+
+  regCtx = regCanvas.getContext('2d');
+  regCtx.strokeStyle = '#ffffff'; 
+  regCtx.lineWidth = 3;             
+  regCtx.lineCap = 'round';
+  regCtx.lineJoin = 'round';
+  regHasDrawn = false;
+  regIsDrawing = false;
+
+  const startDraw = (e) => { regIsDrawing = true; regHasDrawn = true; drawReg(e); };
+  const moveDraw = (e) => { if (!regIsDrawing) return; drawReg(e); };
+  const stopDraw = () => { regIsDrawing = false; regCtx.beginPath(); };
+
+  regCanvas.addEventListener('mousedown', startDraw);
+  regCanvas.addEventListener('mousemove', moveDraw);
+  regCanvas.addEventListener('mouseup', stopDraw);
+  regCanvas.addEventListener('mouseout', stopDraw);
+
+  regCanvas.addEventListener('touchstart', (e) => { startDraw(e.touches[0]); e.preventDefault(); }, {passive: false});
+  regCanvas.addEventListener('touchmove', (e) => { moveDraw(e.touches[0]); e.preventDefault(); }, {passive: false});
+  regCanvas.addEventListener('touchend', stopDraw);
+}
+
+function drawReg(e) {
+  if (!regIsDrawing) return; // Mencegah kanvas menggambar jika tidak diklik
+  const rect = regCanvas.getBoundingClientRect();
+  regCtx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+  regCtx.stroke();
+  regCtx.beginPath();
+  regCtx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+}
+
+function clearRegSignature() {
+  if (regCtx) regCtx.clearRect(0, 0, regCanvas.width, regCanvas.height);
+  regHasDrawn = false;
 }
 </script>
 </body>
