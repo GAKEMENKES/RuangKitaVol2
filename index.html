@@ -1136,6 +1136,11 @@ async function uploadToCloudinary(base64Data) {
   try {
     const response = await fetch(url, { method: 'POST', body: formData });
     const data = await response.json();
+
+if (!response.ok) {
+      throw new Error(data.error?.message || 'Gagal dari server Cloudinary');
+    }
+
     return data.secure_url;
   } catch (error) {
     console.error('Error Cloudinary:', error);
@@ -2328,11 +2333,7 @@ function closeBAModal() {
 }
 
 async function submitBAData() {
-  if (!baHasDrawn) {
-    alert("Maaf, Tanda Tangan Digital wajib Anda isi sebagai bentuk pertanggungjawaban!");
-    return;
-  }
-
+  
   const idx = bookings.findIndex(x => x.id === activeBAId);
   if (idx === -1) return;
 
@@ -3307,24 +3308,6 @@ function openEditAccountModal() {
   document.getElementById('modal-edit-account').style.display = 'flex';
 }
 
-async function saveAccountUpdates() {
-  const n = document.getElementById('edit-acc-name').value.trim();
-  const d = document.getElementById('edit-acc-dept').value.trim();
-  if(!n) return;
-  
-  try {
-      await fbPatch(`users/${currentUser.uid}`, { name: n, dept: d, signature: finalSignature });
-      currentUser.name = n; 
-      currentUser.dept = d;
-      currentUser.signature = finalSignature;
-      localStorage.setItem('rb_current_user', JSON.stringify(currentUser));
-      closeEditAccountModal(); 
-      renderHome(); 
-      alert('Profil & Tanda Tangan Diperbarui!');
-  } catch(e) {
-      alert('Gagal menyimpan profil ke server.');
-  }
-}
 function updateFabVisibility() {
   const fab = document.getElementById('fab-help-btn');
   if (fab) { fab.style.display = currentUser ? 'flex' : 'none'; }
