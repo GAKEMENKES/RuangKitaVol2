@@ -1551,13 +1551,19 @@ if (document.activeElement &&
         <div class="fg"><label>Blok Lokasi *</label><input type="text" id="m-room-loc" value="${currentRoom.location}"></div>
         <div class="fg"><label>Kapasitas Maksimal *</label><input type="number" id="m-room-cap" value="${currentRoom.capacity}"></div>
         <div class="fg"><label>Posisi Lantai *</label><input type="number" id="m-room-floor" value="${currentRoom.floor}"></div>
-<div class="fg full">
-  <label>Upload Foto Ruangan (Format: JPG/PNG, Maks 500KB) *</label>
-  <input type="file" id="m-room-file" accept="image/*" style="padding: 8px 14px;">
-  <input type="hidden" id="m-room-img-hidden" value="${currentRoom.image || ''}">
-  ${currentRoom.image ? `<div style="margin-top:5px; font-size:11px; color:var(--ok);">✓ Sudah ada foto tersimpan</div>` : ''}
-</div>
+        <div class="fg full">
+          <label>Upload Foto Ruangan (Format: JPG/PNG, Maks 500KB) *</label>
+          <input type="file" id="m-room-file" accept="image/*" style="padding: 8px 14px;">
+          <input type="hidden" id="m-room-img-hidden" value="${currentRoom.image || ''}">
+          ${currentRoom.image ? `<div style="margin-top:5px; font-size:11px; color:var(--ok);">✓ Sudah ada foto tersimpan</div>` : ''}
+        </div>
         <div class="fg full"><label>Fasilitas Penunjang (Gunakan tanda koma pembatas) *</label><input type="text" id="m-room-fac" value="${facString}"></div>
+        
+        <!-- ✅ TAMBAHAN BARU: CHECKBOX HYBRID -->
+        <div class="fg full" style="flex-direction: row; align-items: center; gap: 10px; background: #262626; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--bdr2);">
+          <input type="checkbox" id="m-room-hybrid" ${currentRoom.isHybrid ? 'checked' : ''} style="width: 18px; height: 18px; cursor: pointer; accent-color: var(--acc);">
+          <label for="m-room-hybrid" style="cursor: pointer; font-size: 13.5px; color: #fff; text-transform: none; margin: 0; font-weight: 600;">Centang jika ruangan ini mendukung Hybrid Meeting (Zoom, Teleconference, dll)</label>
+        </div>
       </div>
       <div class="form-actions" style="margin-top:15px;">
         ${isEditMode ? `<button class="btn-sec" onclick="cancelEditMasterRoom()"><i class="ti ti-x"></i> Batal</button>` : ''}
@@ -2048,6 +2054,11 @@ function renderRooms() {
 
   grid.innerHTML = f.map(r => {
     const facs = getFacs(r);
+const isHybrid = r.isHybrid || facs.some(f => f.toLowerCase().includes('hybrid'));
+  
+  const hybridBadgeHtml = isHybrid 
+    ? `<div style="position:absolute; top:12px; left:12px; background:rgba(0, 113, 235, 0.85); color:#fff; font-size:11px; padding:4px 10px; border-radius:8px; font-weight:700; display:flex; align-items:center; gap:5px; border:1px solid #3392ff; z-index:2; backdrop-filter:blur(4px);"><i class="ti ti-video"></i> Hybrid Friendly</div>` 
+    : '';
 
     const today = todayStr();
     const roomBookings = bookings
@@ -2120,6 +2131,7 @@ function renderRooms() {
       <div class="rc-img" style="background: #111;">
         <img src="${r.image}" alt="${r.name}" style="width:100%; height:100%; object-fit:cover;">
         <div class="cap-badge"><i class="ti ti-users" style="font-size:12px"></i> Maks ${r.capacity} Staf</div>
+${hybridBadgeHtml}
       </div>
       <div class="rc-body">
         <div class="rc-name" style="font-size:18px; font-weight:700; margin-bottom:4px;">${r.name}</div>
@@ -3193,7 +3205,7 @@ async function saveMasterRoomAction() {
   const facInput = document.getElementById('m-room-fac').value.trim();
   const fileInput = document.getElementById('m-room-file');
   const hiddenImg = document.getElementById('m-room-img-hidden').value;
-
+const isHybridRoom = document.getElementById('m-room-hybrid').checked;
   if (!name || !loc || !cap || !floor || !facInput) {
     alert('Mohon lengkapi seluruh field data master yang wajib!');
     return;
@@ -3231,6 +3243,7 @@ async function saveMasterRoomAction() {
     floor: floor,
     facilities: facArray,
     image: finalImageUrl,
+isHybrid: isHybridRoom,
     description: rooms.find(x => x.id === editId)?.description || 'Ruang pertemuan operasional.'
   };
 
